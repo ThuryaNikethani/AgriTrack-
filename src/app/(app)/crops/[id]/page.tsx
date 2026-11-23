@@ -11,7 +11,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { DeleteButton } from "@/components/form-helpers";
 import { EmptyRow, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { cropStatusVariant } from "@/lib/crops";
-import { enumLabel, formatDate, formatKg, formatNumber } from "@/lib/utils";
+import { enumLabel, formatCurrency, formatDate, formatKg, formatNumber } from "@/lib/utils";
+import { getCropProfitability } from "@/lib/finance";
 import { deleteCrop } from "../actions";
 
 export default async function CropDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +25,7 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
     },
   });
   if (!crop) notFound();
+  const [profit] = await getCropProfitability(undefined, crop.id);
 
   const harvested = crop.harvests.reduce((sum, h) => sum + (h.actualQuantityKg ?? 0), 0);
 
@@ -35,7 +37,17 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
     ["Plants", crop.plantedQuantity],
     ["Expected yield", formatKg(crop.expectedYieldKg)],
     ["Harvested so far", formatKg(harvested)],
+    ["Sold", formatKg(profit?.soldKg ?? 0)],
   ];
+
+  const financials: [string, number][] = profit
+    ? [
+        ["Revenue - Villa", profit.villaRevenue],
+        ["Revenue - Tea Factory / external", profit.externalRevenue],
+        ["Direct expenses", -profit.directExpenses],
+        ["Fertilizer cost (estimated)", -profit.fertilizerCost],
+      ]
+    : [];
 
   return (
     <>
@@ -122,7 +134,29 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
           </Table>
         </Card>
 
-        <Card className="lg:col-span-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Crop cycle profitability</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="divide-y divide-gray-100 text-sm">
+              {financials.map(([label, value]) => (
+                <div key={label} className="flex justify-between py-2">
+                  <dt className="text-gray-500">{label}</dt>
+                  <dd className={value < 0 ? "text-red-600" : "text-gray-900"}>{formatCurrency(value)}</dd>
+                </div>
+              ))}
+              <div className="flex justify-between py-2 font-semibold">
+                <dt>{(profit?.profit ?? 0) >= 0 ? "Net profit" : "Net loss"}</dt>
+                <dd className={(profit?.profit ?? 0) < 0 ? "text-red-600" : "text-green-700"}>
+                  {formatCurrency(profit?.profit ?? 0)}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Fertilizer applied</CardTitle>
           </CardHeader>

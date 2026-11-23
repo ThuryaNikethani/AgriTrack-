@@ -8,13 +8,18 @@ export function DateRangeFilter({
   from,
   to,
   select,
+  hidden,
 }: {
   from: string;
   to: string;
   select?: { name: string; label: string; value?: string; options: Option[] };
+  /** Extra query parameters to keep when the filter is applied. */
+  hidden?: Record<string, string>;
 }) {
   return (
     <form method="get" className="mb-4 flex flex-wrap items-end gap-3 print:hidden">
+      {hidden &&
+        Object.entries(hidden).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)}
       <div className="flex flex-col gap-1">
         <Label htmlFor="from">From</Label>
         <Input id="from" name="from" type="date" defaultValue={from} className="w-40" />
