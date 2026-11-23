@@ -9,6 +9,8 @@ export const authConfig = {
     signIn: "/login",
   },
   session: { strategy: "jwt" },
+  // Required when self-hosting with `next start` (Vercel sets this automatically).
+  trustHost: true,
   providers: [],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
