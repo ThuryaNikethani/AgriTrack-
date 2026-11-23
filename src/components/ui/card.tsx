@@ -21,7 +21,7 @@ export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
   return (
     <h3
       className={cn(
-        "relative pl-3 text-[15px] font-bold tracking-tight text-gray-900 before:absolute before:left-0 before:top-1/2 before:h-4 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-gradient-to-b before:from-gold-300 before:to-gold-500 before:content-['']",
+        "relative pl-3 text-[16px] font-bold tracking-tight text-gray-900 before:absolute before:left-0 before:top-1/2 before:h-4 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-gradient-to-b before:from-gold-300 before:to-gold-500 before:content-['']",
         className,
       )}
       {...props}

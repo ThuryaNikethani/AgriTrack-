@@ -55,7 +55,7 @@ export function Sidebar({
             if (groupItems.length === 0) return null;
             return (
               <div key={group}>
-                <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-300/80">{group}</p>
+                <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-gold-300/80">{group}</p>
                 <div className="space-y-1">
                   {groupItems.map((item) => {
                     const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -87,7 +87,7 @@ export function Sidebar({
                         </span>
                         <span className="flex-1">{item.label}</span>
                         {item.href === "/notifications" && unread > 0 && (
-                          <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                          <span className="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">
                             {unread > 99 ? "99+" : unread}
                           </span>
                         )}

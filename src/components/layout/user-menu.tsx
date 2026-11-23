@@ -19,7 +19,7 @@ export function UserMenu({ name, role }: { name: string; role: string }) {
       </span>
       <div className="hidden leading-tight sm:block">
         <p className="text-sm font-semibold text-gray-900">{name}</p>
-        <p className="text-[11px] font-medium text-gold-600">{enumLabel(role)}</p>
+        <p className="text-[12px] font-medium text-gold-600">{enumLabel(role)}</p>
       </div>
       <form action={logoutAction}>
         <button

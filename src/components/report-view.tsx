@@ -14,7 +14,7 @@ export function ReportView({ report }: { report: Report }) {
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
         {report.summary.map((s) => (
           <div key={s.label} className="rounded-md bg-gray-50 p-3 print:bg-transparent print:p-1">
-            <dt className="text-[11px] uppercase tracking-wide text-gray-500">{s.label}</dt>
+            <dt className="text-[12px] uppercase tracking-wide text-gray-500">{s.label}</dt>
             <dd className="mt-0.5 font-semibold text-gray-900">{s.value}</dd>
           </div>
         ))}
@@ -24,7 +24,7 @@ export function ReportView({ report }: { report: Report }) {
         <section key={idx} className="mb-6 break-inside-avoid-page">
           {section.title && <h3 className="mb-2 font-semibold text-gray-900">{section.title}</h3>}
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm print:text-[10px]">
+            <table className="w-full border-collapse text-sm print:text-[11px]">
               <thead>
                 <tr className="bg-green-700 text-white print:bg-green-700">
                   {section.columns.map((c) => (

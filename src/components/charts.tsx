@@ -150,7 +150,7 @@ export function BreakdownPie({ data }: { data: { label: string; value: number }[
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-x-0 top-[45%] -translate-y-1/2 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total</p>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total</p>
         <p className="text-sm font-extrabold text-gray-900">{compact(total)}</p>
       </div>
     </div>
