@@ -1,15 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9f6;
-  --foreground: #1c2a1f;
+  --background: #f4f5ef;
+  --foreground: #14231b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Athukorala Group brand: green (from the logo) and gold. The default "green" scale is replaced. */
+@theme {
+  --color-green-50: #f0f9f1;
+  --color-green-100: #dcf1df;
+  --color-green-200: #bbe3c1;
+  --color-green-300: #8ccf96;
+  --color-green-400: #57b565;
+  --color-green-500: #339a43;
+  --color-green-600: #237d35;
+  --color-green-700: #1d632d;
+  --color-green-800: #1a4f27;
+  --color-green-900: #164222;
+  --color-green-950: #082410;
+
+  --color-gold-50: #fdf9ec;
+  --color-gold-100: #f9efc9;
+  --color-gold-200: #f2dd8f;
+  --color-gold-300: #eac65a;
+  --color-gold-400: #e2b13a;
+  --color-gold-500: #c9932a;
+  --color-gold-600: #a87322;
+  --color-gold-700: #855620;
+
+  --shadow-soft: 0 1px 2px rgb(16 24 20 / 0.04), 0 2px 8px -2px rgb(16 24 20 / 0.06);
+  --shadow-lift: 0 4px 12px -2px rgb(16 24 20 / 0.08), 0 12px 32px -8px rgb(16 24 20 / 0.12);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @media print {
@@ -27,7 +68,31 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgb(51 154 67 / 0.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgb(226 177 58 / 0.1), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(226 177 58 / 0.3);
+}
+
+/* Slim scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(20 35 27 / 0.2) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
