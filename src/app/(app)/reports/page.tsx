@@ -18,22 +18,26 @@ import {
   reportQuery,
   reportsForModule,
   resolveReportParams,
+  type ReportParams,
 } from "@/lib/reports";
+import { EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { customerTypeLabel } from "@/lib/sales";
 
 export const metadata = { title: "Reports" };
 
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; from?: string; to?: string; cropId?: string }>;
+  searchParams: Promise<ReportParams>;
 }) {
   const params = await searchParams;
-  const { type, range, cropId } = resolveReportParams(params);
+  const { type, range, cropId, customer, category } = resolveReportParams(params);
   const [report, crops] = await Promise.all([
     buildReport(params),
     prisma.crop.findMany({ orderBy: [{ status: "asc" }, { name: "asc" }] }),
   ]);
-  const query = reportQuery({ type, from: range.fromInput, to: range.toInput, cropId });
+  const filters = { cropId, customer, category };
+  const query = reportQuery({ type, from: range.fromInput, to: range.toInput, ...filters });
   const cfg = reportConfig(type);
   const presets = getPeriodPresets();
   const activePreset = matchPreset(range.fromInput, range.toInput);
@@ -115,7 +119,7 @@ export default async function ReportsPage({
               {presets.map((p) => (
                 <Link
                   key={p.key}
-                  href={`/reports?${reportQuery({ type, from: p.from, to: p.to, cropId })}`}
+                  href={`/reports?${reportQuery({ type, from: p.from, to: p.to, ...filters })}`}
                   className={cn(
                     "rounded-xl px-4 py-2 text-sm font-semibold transition",
                     activePreset?.key === p.key
@@ -185,6 +189,32 @@ export default async function ReportsPage({
                 {crops.map((c) => (
                   <option key={c.id} value={c.id}>
                     {cropLabel(c)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+          {type === "sales" && (
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="customer">Sold to</Label>
+              <Select id="customer" name="customer" defaultValue={customer ?? ""} className="w-52">
+                <option value="">All customers</option>
+                {(Object.keys(customerTypeLabel) as (keyof typeof customerTypeLabel)[]).map((c) => (
+                  <option key={c} value={c}>
+                    {customerTypeLabel[c]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+          {type === "expenses" && (
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="category">Category</Label>
+              <Select id="category" name="category" defaultValue={category ?? ""} className="w-48">
+                <option value="">All categories</option>
+                {EXPENSE_CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </Select>

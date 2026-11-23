@@ -2,7 +2,8 @@ import { format, startOfDay, startOfYear, subYears } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { cropLabel } from "@/lib/crops";
 import { parseDateRange, type DateRange } from "@/lib/date-range";
-import { expenseCategoryLabel } from "@/lib/expenses";
+import type { CustomerType, ExpenseCategory } from "@prisma/client";
+import { EXPENSE_CATEGORIES, expenseCategoryLabel } from "@/lib/expenses";
 import { getCropProfitability, getFinancialSummary, getPeriodSeries } from "@/lib/finance";
 import { getQuantity, getTiming, isCompleted, timingBadge, quantityBadge } from "@/lib/harvest";
 import { customerTypeLabel } from "@/lib/sales";
@@ -59,11 +60,22 @@ export function reportsForModule(module: ReportModule): ReportType[] {
   return (Object.keys(REPORT_TYPES) as ReportType[]).filter((t) => REPORT_TYPES[t].module === module);
 }
 
-export type ReportParams = { type?: string; from?: string; to?: string; cropId?: string };
+export type ReportParams = {
+  type?: string;
+  from?: string;
+  to?: string;
+  cropId?: string;
+  /** Sales report: VILLA / TEA_FACTORY / EXTERNAL */
+  customer?: string;
+  /** Expense report: expense category */
+  category?: string;
+};
+
+const CUSTOMER_TYPES: CustomerType[] = ["VILLA", "TEA_FACTORY", "EXTERNAL"];
 
 export function resolveReportParams(params: ReportParams) {
   const type: ReportType = params.type && params.type in REPORT_TYPES ? (params.type as ReportType) : "harvest";
-  const cfg = REPORT_TYPES[type];
+  const cfg = reportConfig(type);
 
   let defaultFrom: Date | undefined;
   if (cfg.daily) defaultFrom = startOfDay(new Date());
@@ -72,7 +84,15 @@ export function resolveReportParams(params: ReportParams) {
 
   const range = parseDateRange(params, defaultFrom);
   const cropId = cfg.usesCrop && params.cropId ? params.cropId : undefined;
-  return { type, range, cropId };
+  const customer =
+    type === "sales" && CUSTOMER_TYPES.includes(params.customer as CustomerType)
+      ? (params.customer as CustomerType)
+      : undefined;
+  const category =
+    type === "expenses" && EXPENSE_CATEGORIES.some((c) => c.value === params.category)
+      ? (params.category as ExpenseCategory)
+      : undefined;
+  return { type, range, cropId, customer, category };
 }
 
 function subtitle(range: DateRange, filters: string[] = []) {
@@ -88,14 +108,19 @@ function subtitle(range: DateRange, filters: string[] = []) {
 const sum = (rows: ReportRow[], key: string) => rows.reduce((s, r) => s + toNumber(r[key]), 0);
 
 export async function buildReport(params: ReportParams): Promise<Report> {
-  const { type, range, cropId } = resolveReportParams(params);
+  const { type, range, cropId, customer, category } = resolveReportParams(params);
   const crop = cropId ? await prisma.crop.findUnique({ where: { id: cropId } }) : null;
+  const filters = [
+    crop ? `Crop: ${cropLabel(crop)}` : null,
+    customer ? `Sold to: ${customerTypeLabel[customer]}` : null,
+    category ? `Category: ${expenseCategoryLabel[category]}` : null,
+  ].filter((f): f is string => f !== null);
   const base = {
     type,
     title: REPORT_TYPES[type].label,
     subtitle: reportConfig(type).snapshot
       ? `As at ${format(new Date(), "dd MMM yyyy")}`
-      : subtitle(range, crop ? [`Crop: ${cropLabel(crop)}`] : []),
+      : subtitle(range, filters),
     generatedAt: format(new Date(), "dd MMM yyyy HH:mm"),
   };
   const dates = { gte: range.from, lte: range.to };
@@ -225,7 +250,7 @@ export async function buildReport(params: ReportParams): Promise<Report> {
 
     case "sales": {
       const sales = await prisma.sale.findMany({
-        where: { saleDate: dates, cropId },
+        where: { saleDate: dates, cropId, customerType: customer },
         include: { crop: true },
         orderBy: { saleDate: "asc" },
       });
@@ -267,7 +292,7 @@ export async function buildReport(params: ReportParams): Promise<Report> {
 
     case "expenses": {
       const expenses = await prisma.expense.findMany({
-        where: { date: dates, cropId },
+        where: { date: dates, cropId, category },
         include: { crop: true },
         orderBy: { date: "asc" },
       });
@@ -758,8 +783,17 @@ export async function buildReport(params: ReportParams): Promise<Report> {
 }
 
 /** Query string for the report download links. */
-export function reportQuery(params: { type: string; from: string; to: string; cropId?: string }) {
+export function reportQuery(params: {
+  type: string;
+  from: string;
+  to: string;
+  cropId?: string;
+  customer?: string;
+  category?: string;
+}) {
   const q = new URLSearchParams({ type: params.type, from: params.from, to: params.to });
   if (params.cropId) q.set("cropId", params.cropId);
+  if (params.customer) q.set("customer", params.customer);
+  if (params.category) q.set("category", params.category);
   return q.toString();
 }

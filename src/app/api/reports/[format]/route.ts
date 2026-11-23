@@ -22,6 +22,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ form
     from: sp.get("from") ?? undefined,
     to: sp.get("to") ?? undefined,
     cropId: sp.get("cropId") ?? undefined,
+    customer: sp.get("customer") ?? undefined,
+    category: sp.get("category") ?? undefined,
   });
 
   const fileBase = `agritrack-${report.type}-${new Date().toISOString().slice(0, 10)}`;
