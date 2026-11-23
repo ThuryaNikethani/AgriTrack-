@@ -9,6 +9,7 @@ import { customerTypeLabel } from "@/lib/sales";
 import { getStockStatus, stockBadge } from "@/lib/stock";
 import { enumLabel, toNumber } from "@/lib/utils";
 import { formatLkr, type Report, type ReportRow } from "@/lib/report-format";
+import { matchPreset } from "@/lib/report-periods";
 
 /** Sidebar module each report belongs to (used to group reports and to show them on each page). */
 export const REPORT_MODULES = [
@@ -34,15 +35,15 @@ type ReportConfig = {
 
 export const REPORT_TYPES = {
   crops: { label: "Crop Register Report", module: "Crops", daily: false, usesCrop: true },
-  cultivation: { label: "Daily Cultivation Report", module: "Crops", daily: true, usesCrop: true },
+  cultivation: { label: "Cultivation Report", module: "Crops", daily: true, usesCrop: true },
   "crop-performance": { label: "Crop Performance Report", module: "Crops", daily: false, usesCrop: true },
-  harvest: { label: "Daily Harvest Report", module: "Harvests", daily: true, usesCrop: true },
+  harvest: { label: "Harvest Report", module: "Harvests", daily: true, usesCrop: true },
   "fertilizer-usage": { label: "Fertilizer Usage Report", module: "Fertilizers", daily: false, usesCrop: true },
   "fertilizer-stock": { label: "Fertilizer Stock & Purchases Report", module: "Fertilizers", daily: false, usesCrop: false },
   inventory: { label: "Inventory Report", module: "Inventory", daily: false, usesCrop: false, snapshot: true },
   "inventory-movements": { label: "Inventory Movements Report", module: "Inventory", daily: false, usesCrop: false },
-  sales: { label: "Daily Sales Report", module: "Sales", daily: true, usesCrop: true },
-  expenses: { label: "Daily Expense Report", module: "Expenses", daily: true, usesCrop: true },
+  sales: { label: "Sales Report", module: "Sales", daily: true, usesCrop: true },
+  expenses: { label: "Expense Report", module: "Expenses", daily: true, usesCrop: true },
   "monthly-financial": { label: "Monthly Financial Report", module: "Finance", daily: false, usesCrop: false },
   "annual-financial": { label: "Annual Financial Report", module: "Finance", daily: false, usesCrop: false },
   "profit-loss": { label: "Profit & Loss Report", module: "Finance", daily: false, usesCrop: false },
@@ -74,12 +75,14 @@ export function resolveReportParams(params: ReportParams) {
   return { type, range, cropId };
 }
 
-function subtitle(range: DateRange, cropName?: string) {
+function subtitle(range: DateRange, filters: string[] = []) {
   const sameDay = range.fromInput === range.toInput;
-  const period = sameDay
+  const dates = sameDay
     ? format(range.from, "dd MMM yyyy")
     : `${format(range.from, "dd MMM yyyy")} - ${format(range.to, "dd MMM yyyy")}`;
-  return cropName ? `${period} | Crop: ${cropName}` : period;
+  const preset = matchPreset(range.fromInput, range.toInput);
+  const period = preset ? `${preset.label} (${dates})` : dates;
+  return [period, ...filters].join(" | ");
 }
 
 const sum = (rows: ReportRow[], key: string) => rows.reduce((s, r) => s + toNumber(r[key]), 0);
@@ -92,7 +95,7 @@ export async function buildReport(params: ReportParams): Promise<Report> {
     title: REPORT_TYPES[type].label,
     subtitle: reportConfig(type).snapshot
       ? `As at ${format(new Date(), "dd MMM yyyy")}`
-      : subtitle(range, crop ? cropLabel(crop) : undefined),
+      : subtitle(range, crop ? [`Crop: ${cropLabel(crop)}`] : []),
     generatedAt: format(new Date(), "dd MMM yyyy HH:mm"),
   };
   const dates = { gte: range.from, lte: range.to };

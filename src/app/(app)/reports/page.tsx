@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FileSpreadsheet, FileText, SlidersHorizontal } from "lucide-react";
+import { CalendarRange, FileSpreadsheet, FileText, SlidersHorizontal } from "lucide-react";
+import { getPeriodPresets, matchPreset } from "@/lib/report-periods";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { PrintButton } from "@/components/print-button";
@@ -34,6 +35,8 @@ export default async function ReportsPage({
   ]);
   const query = reportQuery({ type, from: range.fromInput, to: range.toInput, cropId });
   const cfg = reportConfig(type);
+  const presets = getPeriodPresets();
+  const activePreset = matchPreset(range.fromInput, range.toInput);
 
   return (
     <>
@@ -79,7 +82,7 @@ export default async function ReportsPage({
                   {types.map((t) => (
                     <li key={t}>
                       <Link
-                        href={`/reports?type=${t}`}
+                        href={`/reports?${reportQuery({ type: t, from: range.fromInput, to: range.toInput })}`}
                         className={cn(
                           "block rounded-lg px-2.5 py-1.5 text-sm transition",
                           t === type
@@ -97,6 +100,44 @@ export default async function ReportsPage({
           })}
         </div>
 
+        {!cfg.snapshot && (
+          <div className="mb-6 animate-fade-up rounded-2xl border border-gray-200/70 bg-white/95 p-5 shadow-soft">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold-200 to-gold-400 text-green-950">
+                <CalendarRange className="h-5 w-5" />
+              </span>
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-gray-900">Period</p>
+                <p className="text-xs text-gray-500">Pick a period, or set custom dates below</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {presets.map((p) => (
+                <Link
+                  key={p.key}
+                  href={`/reports?${reportQuery({ type, from: p.from, to: p.to, cropId })}`}
+                  className={cn(
+                    "rounded-xl px-4 py-2 text-sm font-semibold transition",
+                    activePreset?.key === p.key
+                      ? "bg-gradient-to-b from-green-600 to-green-700 text-white shadow-md shadow-green-900/20"
+                      : "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-green-50 hover:text-green-800",
+                  )}
+                >
+                  {p.label}
+                </Link>
+              ))}
+              <span
+                className={cn(
+                  "rounded-xl px-4 py-2 text-sm font-semibold",
+                  activePreset ? "text-gray-400" : "bg-gold-100 text-gold-700 ring-1 ring-inset ring-gold-200",
+                )}
+              >
+                Custom
+              </span>
+            </div>
+          </div>
+        )}
+
         <form
           method="get"
           className="mb-6 flex animate-fade-up flex-wrap items-end gap-4 rounded-2xl border border-gray-200/70 bg-white/95 p-5 shadow-soft"
@@ -107,7 +148,7 @@ export default async function ReportsPage({
             </span>
             <div className="leading-tight">
               <p className="text-sm font-bold text-gray-900">Report options</p>
-              <p className="text-xs text-gray-500">Type, period and crop</p>
+              <p className="text-xs text-gray-500">Report, custom dates and filters</p>
             </div>
           </div>
           <div className="flex flex-col gap-1">
