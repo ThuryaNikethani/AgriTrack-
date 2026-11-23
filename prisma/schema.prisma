@@ -1,0 +1,259 @@
+// AgriTrack database schema
+// Smart Polytunnel & Agricultural Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Crops (one record = one crop cycle in the polytunnel)
+// ---------------------------------------------------------------------------
+
+enum CropStatus {
+  GROWING
+  HARVESTING
+  COMPLETED
+  FAILED
+}
+
+model Crop {
+  id                  String     @id @default(cuid())
+  name                String // vegetable type e.g. Tomato
+  variety             String?
+  bedLocation         String? // bed / section inside the polytunnel
+  plantedDate         DateTime
+  expectedHarvestDate DateTime
+  plantedQuantity     Int // number of plants / seedlings
+  expectedYieldKg     Float // expected total yield for the cycle
+  status              CropStatus @default(GROWING)
+  notes               String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  harvests         Harvest[]
+  fertilizerUsages FertilizerUsage[]
+  sales            Sale[]
+  expenses         Expense[]
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Harvests (scheduled vs actual)
+// ---------------------------------------------------------------------------
+
+model Harvest {
+  id                 String    @id @default(cuid())
+  cropId             String
+  scheduledDate      DateTime
+  expectedQuantityKg Float
+  actualDate         DateTime?
+  actualQuantityKg   Float?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  crop Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([cropId])
+  @@index([scheduledDate])
+}
+
+// ---------------------------------------------------------------------------
+// Sales & revenue
+// ---------------------------------------------------------------------------
+
+enum CustomerType {
+  VILLA
+  TEA_FACTORY
+  EXTERNAL
+}
+
+model Sale {
+  id           String       @id @default(cuid())
+  cropId       String
+  saleDate     DateTime
+  quantityKg   Float
+  unitPrice    Decimal      @db.Decimal(12, 2) // price per kg (LKR)
+  totalAmount  Decimal      @db.Decimal(12, 2)
+  customerType CustomerType
+  customerName String?
+  notes        String?
+  createdAt    DateTime     @default(now())
+
+  crop Crop @relation(fields: [cropId], references: [id], onDelete: Restrict)
+
+  @@index([saleDate])
+  @@index([cropId])
+}
+
+// ---------------------------------------------------------------------------
+// Expenses
+// ---------------------------------------------------------------------------
+
+enum ExpenseCategory {
+  FERTILIZER
+  SEEDS
+  LABOUR
+  EQUIPMENT
+  MAINTENANCE
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  date        DateTime
+  category    ExpenseCategory
+  description String
+  amount      Decimal         @db.Decimal(12, 2)
+  cropId      String?
+  createdAt   DateTime        @default(now())
+
+  crop               Crop?               @relation(fields: [cropId], references: [id], onDelete: SetNull)
+  fertilizerPurchase FertilizerPurchase?
+
+  @@index([date])
+  @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// Fertilizer management
+// ---------------------------------------------------------------------------
+
+enum FertilizerType {
+  ORGANIC
+  CHEMICAL
+}
+
+model Fertilizer {
+  id           String         @id @default(cuid())
+  name         String
+  type         FertilizerType
+  unit         String         @default("kg")
+  currentStock Float          @default(0)
+  reorderLevel Float          @default(0)
+  supplier     String?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  usages    FertilizerUsage[]
+  purchases FertilizerPurchase[]
+}
+
+model FertilizerUsage {
+  id           String   @id @default(cuid())
+  fertilizerId String
+  cropId       String
+  date         DateTime
+  quantity     Float
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  fertilizer Fertilizer @relation(fields: [fertilizerId], references: [id], onDelete: Cascade)
+  crop       Crop       @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+}
+
+model FertilizerPurchase {
+  id           String   @id @default(cuid())
+  fertilizerId String
+  date         DateTime
+  quantity     Float
+  totalCost    Decimal  @db.Decimal(12, 2)
+  expenseId    String?  @unique
+  createdAt    DateTime @default(now())
+
+  fertilizer Fertilizer @relation(fields: [fertilizerId], references: [id], onDelete: Cascade)
+  expense    Expense?   @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// General inventory (seeds, supplies, equipment)
+// ---------------------------------------------------------------------------
+
+enum InventoryCategory {
+  SEED
+  SUPPLY
+  EQUIPMENT
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+model InventoryItem {
+  id           String            @id @default(cuid())
+  name         String
+  category     InventoryCategory
+  unit         String
+  quantity     Float             @default(0)
+  reorderLevel Float             @default(0)
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  movements InventoryMovement[]
+}
+
+model InventoryMovement {
+  id        String       @id @default(cuid())
+  itemId    String
+  date      DateTime
+  type      MovementType
+  quantity  Float
+  note      String?
+  createdAt DateTime     @default(now())
+
+  item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+enum NotificationType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  HARVEST_DUE
+  HARVEST_OVERDUE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  dedupeKey String           @unique // one active notification per condition
+  read      Boolean          @default(false)
+  emailed   Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
