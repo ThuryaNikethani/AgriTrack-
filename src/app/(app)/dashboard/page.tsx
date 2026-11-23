@@ -2,7 +2,8 @@ import Link from "next/link";
 import { addDays, endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { AlertTriangle, Building2, PackageX, Sprout, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { PageHeader } from "@/components/page-header";
+import { DashboardHero } from "@/components/dashboard-hero";
+import { requireUser } from "@/lib/session";
 import { StatCard } from "@/components/stat-card";
 import { HarvestBarChart, IncomeExpenseChart } from "@/components/charts";
 import { HarvestQuantityBadge, HarvestTimingBadge } from "@/components/harvest-badges";
@@ -18,6 +19,7 @@ import { formatCurrency, formatDate, formatKg, formatNumber, startOfToday } from
 export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
+  const user = await requireUser();
   const now = new Date();
   const today = startOfToday();
   const monthStart = startOfMonth(now);
@@ -88,10 +90,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description={`Kurunduwatta polytunnel overview - ${formatDate(now)}`}
-      />
+      <DashboardHero name={user.name ?? "there"} alerts={overdue.length + dueSoon.length + lowStock.length} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Active crops" value={activeCrops.length} icon={Sprout} />
@@ -116,7 +115,7 @@ export default async function DashboardPage() {
           tone={lowStock.length ? "amber" : "gray"}
           hint="Fertilizer & supplies"
         />
-        <StatCard label="Revenue this month" value={formatCurrency(month.totalRevenue)} icon={TrendingUp} />
+        <StatCard label="Revenue this month" value={formatCurrency(month.totalRevenue)} icon={TrendingUp} tone="gold" />
         <StatCard label="Expenses this month" value={formatCurrency(month.totalExpenses)} icon={TrendingDown} tone="red" />
         <StatCard
           label={month.netProfit >= 0 ? "Net profit this month" : "Net loss this month"}
