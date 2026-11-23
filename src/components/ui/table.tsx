@@ -11,7 +11,7 @@ export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTab
 }
 
 export function THead({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn("border-y border-gray-100 bg-gray-50/70", className)} {...props} />;
+  return <thead className={cn("border-b border-gray-100 bg-gray-50/70", className)} {...props} />;
 }
 
 export function TBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
