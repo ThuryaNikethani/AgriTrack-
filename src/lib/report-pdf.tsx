@@ -1,10 +1,25 @@
-import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { existsSync, readFileSync } from "fs";
+import path from "path";
+import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { formatCell, isNumericFormat, type Report, type ReportSection } from "@/lib/report-format";
+
+const GREEN = "#1d632d";
+const GOLD = "#c9932a";
+
+/** Company logo from /public, embedded as a data URI (null if the file is missing). */
+function loadLogo(): string | null {
+  const file = path.join(process.cwd(), "public", "athukorala-logo.png");
+  if (!existsSync(file)) return null;
+  return `data:image/png;base64,${readFileSync(file).toString("base64")}`;
+}
 
 const styles = StyleSheet.create({
   page: { padding: 28, fontSize: 8.5, fontFamily: "Helvetica", color: "#1f2937" },
-  header: { borderBottom: "2pt solid #15803d", paddingBottom: 8, marginBottom: 10 },
-  brand: { fontSize: 9, color: "#15803d", fontFamily: "Helvetica-Bold" },
+  header: { flexDirection: "row", alignItems: "center", paddingBottom: 8, marginBottom: 2 },
+  logo: { width: 46, height: 46, marginRight: 12 },
+  goldRule: { height: 2.5, backgroundColor: GOLD, marginBottom: 10 },
+  company: { fontSize: 9, color: GREEN, fontFamily: "Helvetica-Bold", letterSpacing: 1 },
+  brand: { fontSize: 8, color: GOLD, fontFamily: "Helvetica-Bold", marginTop: 1 },
   title: { fontSize: 16, fontFamily: "Helvetica-Bold", marginTop: 2 },
   subtitle: { fontSize: 9, color: "#4b5563", marginTop: 2 },
   summary: { flexDirection: "row", flexWrap: "wrap", marginBottom: 10 },
@@ -17,7 +32,7 @@ const styles = StyleSheet.create({
   headCell: {
     flex: 1,
     padding: 4,
-    backgroundColor: "#15803d",
+    backgroundColor: GREEN,
     color: "#ffffff",
     fontFamily: "Helvetica-Bold",
     borderRight: "0.5pt solid #d1d5db",
@@ -75,16 +90,22 @@ function Section({ section }: { section: ReportSection }) {
   );
 }
 
-function ReportDocument({ report }: { report: Report }) {
+function ReportDocument({ report, logo }: { report: Report; logo: string | null }) {
   const wide = report.sections.some((s) => s.columns.length > 6);
   return (
-    <Document title={report.title} author="AgriTrack">
+    <Document title={report.title} author="Athukorala Group - AgriTrack">
       <Page size="A4" orientation={wide ? "landscape" : "portrait"} style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.brand}>AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</Text>
-          <Text style={styles.title}>{report.title}</Text>
-          <Text style={styles.subtitle}>{report.subtitle}</Text>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
+          {logo && <Image src={logo} style={styles.logo} />}
+          <View>
+            <Text style={styles.company}>ATHUKORALA GROUP</Text>
+            <Text style={styles.brand}>AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</Text>
+            <Text style={styles.title}>{report.title}</Text>
+            <Text style={styles.subtitle}>{report.subtitle}</Text>
+          </View>
         </View>
+        <View style={styles.goldRule} />
 
         <View style={styles.summary}>
           {report.summary.map((s) => (
@@ -115,5 +136,5 @@ function ReportDocument({ report }: { report: Report }) {
 }
 
 export async function renderReportPdf(report: Report): Promise<Buffer> {
-  return renderToBuffer(<ReportDocument report={report} />);
+  return renderToBuffer(<ReportDocument report={report} logo={loadLogo()} />);
 }

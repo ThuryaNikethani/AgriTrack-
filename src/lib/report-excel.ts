@@ -9,7 +9,7 @@ const NUM_FORMATS: Partial<Record<CellFormat, string>> = {
   date: "dd mmm yyyy",
 };
 
-const GREEN = "FF15803D";
+const GREEN = "FF1D632D";
 const FILLS = { danger: "FFFEE2E2", warning: "FFFEF3C7" } as const;
 
 export async function renderReportExcel(report: Report): Promise<Buffer> {
@@ -24,7 +24,7 @@ export async function renderReportExcel(report: Report): Promise<Buffer> {
   titleRow.font = { bold: true, size: 14, color: { argb: GREEN } };
   ws.mergeCells(titleRow.number, 1, titleRow.number, maxCols);
   ws.addRow([report.subtitle]).font = { italic: true, color: { argb: "FF4B5563" } };
-  ws.addRow([`Generated ${report.generatedAt} - AgriTrack, Kurunduwatta Villa & Cottages`]).font = {
+  ws.addRow([`Generated ${report.generatedAt} - Athukorala Group - AgriTrack, Kurunduwatta Villa & Cottages`]).font = {
     size: 9,
     color: { argb: "FF6B7280" },
   };

@@ -5,10 +5,15 @@ import { formatCell, isNumericFormat, type Report } from "@/lib/report-format";
 export function ReportView({ report }: { report: Report }) {
   return (
     <article className="report rounded-lg border border-gray-200 bg-white p-6 shadow-sm print:border-0 print:p-0 print:shadow-none">
-      <header className="mb-5 border-b-2 border-green-700 pb-3">
-        <p className="text-xs font-semibold text-green-700">AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</p>
-        <h2 className="mt-1 text-xl font-bold text-gray-900">{report.title}</h2>
-        <p className="text-sm text-gray-600">{report.subtitle}</p>
+      <header className="mb-5 flex items-center gap-4 border-b-[3px] border-gold-400 pb-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/athukorala-logo.png" alt="Athukorala Group" className="h-16 w-16 rounded-full object-contain" />
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-green-700">Athukorala Group</p>
+          <p className="text-xs font-semibold text-gold-600">AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-green-950">{report.title}</h2>
+          <p className="text-sm text-gray-600">{report.subtitle}</p>
+        </div>
       </header>
 
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
