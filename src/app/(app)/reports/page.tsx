@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FileSpreadsheet, FileText, SlidersHorizontal } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
@@ -6,13 +7,16 @@ import { ReportView } from "@/components/report-view";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/form-controls";
 import { cropLabel } from "@/lib/crops";
+import { findNavItem } from "@/components/layout/nav-items";
+import { cn } from "@/lib/utils";
 import {
+  REPORT_MODULES,
   REPORT_TYPES,
   buildReport,
   reportConfig,
   reportQuery,
+  reportsForModule,
   resolveReportParams,
-  type ReportType,
 } from "@/lib/reports";
 
 export const metadata = { title: "Reports" };
@@ -36,7 +40,7 @@ export default async function ReportsPage({
       <div className="print:hidden">
         <PageHeader
           title="Reports"
-          description="Daily, monthly and annual reports. Filter, print, or download as PDF / Excel."
+          description="Reports for every module - crops, harvests, fertilizers, inventory, sales, expenses and finance. Filter, print, or download as PDF / Excel."
           actions={
             <>
               <PrintButton />
@@ -49,6 +53,49 @@ export default async function ReportsPage({
             </>
           }
         />
+
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {REPORT_MODULES.map((m) => {
+            const Icon = findNavItem(`/${m.toLowerCase()}`)?.icon;
+            const types = reportsForModule(m);
+            const activeModule = types.includes(type);
+            return (
+              <div
+                key={m}
+                className={cn(
+                  "animate-fade-up rounded-2xl border bg-white/95 p-4 shadow-soft transition hover:shadow-lift",
+                  activeModule ? "border-gold-300 ring-2 ring-gold-200" : "border-gray-200/70",
+                )}
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  {Icon && (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-700 text-white shadow-md shadow-green-900/20">
+                      <Icon className="h-[18px] w-[18px]" />
+                    </span>
+                  )}
+                  <p className="font-bold text-gray-900">{m}</p>
+                </div>
+                <ul className="space-y-1">
+                  {types.map((t) => (
+                    <li key={t}>
+                      <Link
+                        href={`/reports?type=${t}`}
+                        className={cn(
+                          "block rounded-lg px-2.5 py-1.5 text-sm transition",
+                          t === type
+                            ? "bg-gradient-to-r from-green-600 to-green-700 font-semibold text-white"
+                            : "text-gray-600 hover:bg-green-50 hover:text-green-800",
+                        )}
+                      >
+                        {REPORT_TYPES[t].label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
 
         <form
           method="get"
@@ -65,11 +112,15 @@ export default async function ReportsPage({
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="type">Report</Label>
-            <Select id="type" name="type" defaultValue={type} className="w-64">
-              {(Object.keys(REPORT_TYPES) as ReportType[]).map((t) => (
-                <option key={t} value={t}>
-                  {REPORT_TYPES[t].label}
-                </option>
+            <Select id="type" name="type" defaultValue={type} className="w-72">
+              {REPORT_MODULES.map((m) => (
+                <optgroup key={m} label={m}>
+                  {reportsForModule(m).map((t) => (
+                    <option key={t} value={t}>
+                      {REPORT_TYPES[t].label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </Select>
           </div>
