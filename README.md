@@ -92,6 +92,8 @@ npx prisma migrate deploy   # create tables
 npm run db:seed             # demo users + sample crops, harvests, sales, expenses
 ```
 
+> **Neon:** run migrations against the direct connection, not the pooler. Remove `-pooler` from the host name for the `migrate deploy` command, and keep the pooled URL in `.env` for the app.
+
 ### 5. Run
 
 ```bash
