@@ -3,6 +3,7 @@ import {
   FlaskConical,
   HandCoins,
   LayoutDashboard,
+  Receipt,
   ShoppingBasket,
   Sprout,
   type LucideIcon,
@@ -20,6 +21,7 @@ export const navItems: NavItem[] = [
   { href: "/crops", label: "Crops", icon: Sprout },
   { href: "/harvests", label: "Harvests", icon: ShoppingBasket },
   { href: "/sales", label: "Sales", icon: HandCoins },
+  { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/fertilizers", label: "Fertilizers", icon: FlaskConical },
   { href: "/inventory", label: "Inventory", icon: Boxes },
 ];
