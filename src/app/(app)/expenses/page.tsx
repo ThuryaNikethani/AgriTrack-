@@ -3,6 +3,7 @@ import { Receipt } from "lucide-react";
 import type { ExpenseCategory } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { ReportMenu } from "@/components/report-menu";
 import { StatCard } from "@/components/stat-card";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { DeleteButton } from "@/components/form-helpers";
@@ -49,7 +50,11 @@ export default async function ExpensesPage({
 
   return (
     <>
-      <PageHeader title="Expense Management" description="All costs of running the polytunnel cultivation." />
+      <PageHeader
+        title="Expense Management"
+        description="All costs of running the polytunnel cultivation."
+        actions={<ReportMenu module="Expenses" from={range.fromInput} to={range.toInput} />}
+      />
 
       <DateRangeFilter
         from={range.fromInput}

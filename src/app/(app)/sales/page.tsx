@@ -2,6 +2,7 @@ import { Building2, Factory, Store, Wallet } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { CropCell } from "@/components/crop-avatar";
+import { ReportMenu } from "@/components/report-menu";
 import { StatCard } from "@/components/stat-card";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { DeleteButton } from "@/components/form-helpers";
@@ -49,6 +50,7 @@ export default async function SalesPage({
       <PageHeader
         title="Sales & Revenue"
         description="Harvested vegetables sold to the Villa, the Tea Factory and external customers."
+        actions={<ReportMenu module="Sales" from={range.fromInput} to={range.toInput} />}
       />
 
       <DateRangeFilter

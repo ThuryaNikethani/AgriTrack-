@@ -26,18 +26,21 @@ export function PageHeader({
   const Icon = icon ?? item?.icon;
 
   return (
-    <section className="relative mb-8 animate-fade-up overflow-hidden rounded-3xl bg-green-950 px-6 py-6 text-white shadow-lift sm:px-8 sm:py-7 print:mb-4 print:bg-white print:p-0 print:text-black print:shadow-none">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-green-700 via-green-900 to-green-950 print:hidden" />
-      <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gold-400/25 blur-3xl print:hidden" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-green-400/15 blur-3xl print:hidden" />
-      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.05] print:hidden" aria-hidden="true">
-        <defs>
-          <pattern id="page-rows" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
-            <path d="M0 20 Q10 10 20 20 T40 20" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#page-rows)" />
-      </svg>
+    // z-20 + decoration clipped in its own layer, so dropdowns in `actions` can overflow the banner.
+    <section className="relative z-20 mb-8 animate-fade-up rounded-3xl bg-green-950 px-6 py-6 text-white shadow-lift sm:px-8 sm:py-7 print:mb-4 print:bg-white print:p-0 print:text-black print:shadow-none">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl print:hidden" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-green-900 to-green-950" />
+        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gold-400/25 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-green-400/15 blur-3xl" />
+        <svg className="absolute inset-0 h-full w-full opacity-[0.05]">
+          <defs>
+            <pattern id="page-rows" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+              <path d="M0 20 Q10 10 20 20 T40 20" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#page-rows)" />
+        </svg>
+      </div>
 
       <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-4">

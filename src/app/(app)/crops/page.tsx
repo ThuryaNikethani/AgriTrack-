@@ -5,6 +5,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { FilterTabs } from "@/components/filter-tabs";
+import { ReportMenu } from "@/components/report-menu";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cropStatusVariant } from "@/lib/crops";
@@ -36,9 +37,12 @@ export default async function CropsPage({
         title="Crop Management"
         description="Vegetables currently planted in the polytunnel and their lifecycle."
         actions={
-          <Link href="/crops/new" className={buttonVariants({ variant: "gold" })}>
-            <Plus /> Add crop
-          </Link>
+          <>
+            <ReportMenu module="Crops" />
+            <Link href="/crops/new" className={buttonVariants({ variant: "gold" })}>
+              <Plus /> Add crop
+            </Link>
+          </>
         }
       />
 

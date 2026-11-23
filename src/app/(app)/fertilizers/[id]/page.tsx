@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { ReportMenu } from "@/components/report-menu";
 import { StockBadge } from "@/components/stock-badge";
 import { DeleteButton } from "@/components/form-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,11 +40,16 @@ export default async function FertilizerDetailPage({ params }: { params: Promise
         title={fertilizer.name}
         description={`${enumLabel(fertilizer.type)} fertilizer - total used ${formatNumber(totalUsed)} ${fertilizer.unit}`}
         actions={
-          <DeleteButton
-            action={deleteFertilizer}
-            id={fertilizer.id}
-            confirmText="Delete this fertilizer and all its usage records?"
-          />
+          <>
+            <ReportMenu module="Fertilizers" />
+            <span className="rounded-lg bg-white">
+              <DeleteButton
+                action={deleteFertilizer}
+                id={fertilizer.id}
+                confirmText="Delete this fertilizer and all its usage records?"
+              />
+            </span>
+          </>
         }
       />
 
