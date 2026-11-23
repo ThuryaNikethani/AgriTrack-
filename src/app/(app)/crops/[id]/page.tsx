@@ -13,8 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { DeleteButton } from "@/components/form-helpers";
 import { EmptyRow, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { cropStatusVariant } from "@/lib/crops";
-import { enumLabel, formatCurrency, formatDate, formatKg, formatNumber, toDateInput } from "@/lib/utils";
-import { ReportMenu } from "@/components/report-menu";
+import { enumLabel, formatCurrency, formatDate, formatKg, formatNumber } from "@/lib/utils";
 import { getCropProfitability } from "@/lib/finance";
 import { deleteCrop } from "../actions";
 
@@ -62,9 +61,7 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
           <>
             <Badge variant={cropStatusVariant[crop.status]} className="bg-white">
               {enumLabel(crop.status)}
-            </Badge>
-            <ReportMenu module="Crops" cropId={crop.id} from={toDateInput(crop.plantedDate)} />
-            <Link href={`/crops/${crop.id}/edit`} className={buttonVariants({ variant: "gold" })}>
+            </Badge>            <Link href={`/crops/${crop.id}/edit`} className={buttonVariants({ variant: "gold" })}>
               <Pencil /> Edit
             </Link>
             <span className="rounded-lg bg-white">

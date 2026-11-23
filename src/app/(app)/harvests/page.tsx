@@ -3,7 +3,6 @@ import { AlertTriangle, CalendarClock, ClipboardCheck, Plus, TrendingDown } from
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { FilterTabs } from "@/components/filter-tabs";
-import { ReportMenu } from "@/components/report-menu";
 import { CropCell } from "@/components/crop-avatar";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/ui/card";
@@ -65,12 +64,9 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
         title="Harvest Management"
         description="Scheduled vs actual harvests. Late, overdue and below-target harvests are highlighted."
         actions={
-          <>
-            <ReportMenu module="Harvests" />
-            <Link href="/harvests/new" className={buttonVariants({ variant: "gold" })}>
-              <Plus /> Schedule harvest
-            </Link>
-          </>
+          <Link href="/harvests/new" className={buttonVariants({ variant: "gold" })}>
+            <Plus /> Schedule harvest
+          </Link>
         }
       />
 

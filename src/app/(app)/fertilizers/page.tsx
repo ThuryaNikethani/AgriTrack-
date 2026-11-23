@@ -3,7 +3,6 @@ import { AlertTriangle, FlaskConical, PackageX } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { CropCell } from "@/components/crop-avatar";
-import { ReportMenu } from "@/components/report-menu";
 import { StatCard } from "@/components/stat-card";
 import { StockBadge } from "@/components/stock-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +30,7 @@ export default async function FertilizersPage() {
     <>
       <PageHeader
         title="Fertilizer Management"
-        description="Fertilizer types, usage per crop and remaining stock."
-        actions={<ReportMenu module="Fertilizers" />}
-      />
+        description="Fertilizer types, usage per crop and remaining stock."      />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <StatCard label="Fertilizer types" value={fertilizers.length} icon={FlaskConical} />

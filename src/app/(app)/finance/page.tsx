@@ -3,7 +3,6 @@ import { startOfMonth, startOfYear, subDays, subMonths, subYears } from "date-fn
 import { Percent, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { FilterTabs } from "@/components/filter-tabs";
-import { ReportMenu } from "@/components/report-menu";
 import { StatCard } from "@/components/stat-card";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { BreakdownPie, CropProfitChart, IncomeExpenseChart } from "@/components/charts";
@@ -44,9 +43,7 @@ export default async function FinancePage({
     <>
       <PageHeader
         title="Financial Analytics"
-        description="Income, expenses and profitability of the polytunnel cultivation."
-        actions={<ReportMenu module="Finance" from={range.fromInput} to={range.toInput} />}
-      />
+        description="Income, expenses and profitability of the polytunnel cultivation."      />
 
       <FilterTabs
         className="mb-4"

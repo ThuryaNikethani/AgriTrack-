@@ -2,7 +2,6 @@ import Link from "next/link";
 import { AlertTriangle, Boxes, PackageX } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
-import { ReportMenu } from "@/components/report-menu";
 import { StatCard } from "@/components/stat-card";
 import { StockBadge } from "@/components/stock-badge";
 import { DeleteButton } from "@/components/form-helpers";
@@ -31,9 +30,7 @@ export default async function InventoryPage() {
     <>
       <PageHeader
         title="Inventory Management"
-        description="Seeds, supplies, equipment and fertilizer stock in one place."
-        actions={<ReportMenu module="Inventory" />}
-      />
+        description="Seeds, supplies, equipment and fertilizer stock in one place."      />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <StatCard label="Stock items" value={items.length + fertilizers.length} icon={Boxes} />
