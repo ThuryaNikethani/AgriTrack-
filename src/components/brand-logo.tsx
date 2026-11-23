@@ -40,7 +40,7 @@ export function BrandLogo({ className }: { className?: string }) {
       ref={ref}
       src={LOGO_SRC}
       alt="Athukorala Group"
-      className={cn("rounded-xl bg-white object-contain p-1", className)}
+      className={cn("rounded-full bg-white object-contain ring-2 ring-gold-300/70", className)}
       onError={() => setFailed(true)}
     />
   );
@@ -54,13 +54,13 @@ export function BrandLockup({ tone = "light" }: { tone?: "light" | "dark" }) {
       <div className="min-w-0 leading-tight">
         <p
           className={cn(
-            "truncate text-[13px] font-extrabold uppercase tracking-[0.12em]",
+            "truncate text-[14px] font-extrabold uppercase tracking-[0.12em]",
             tone === "light" ? "text-white" : "text-green-800",
           )}
         >
           Athukorala Group
         </p>
-        <p className={cn("text-[11px] font-semibold", tone === "light" ? "text-gold-300" : "text-gold-600")}>
+        <p className={cn("text-[12px] font-semibold", tone === "light" ? "text-gold-300" : "text-gold-600")}>
           AgriTrack · Polytunnel
         </p>
       </div>
