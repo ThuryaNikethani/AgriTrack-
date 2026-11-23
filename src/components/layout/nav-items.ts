@@ -1,4 +1,4 @@
-import { FlaskConical, LayoutDashboard, ShoppingBasket, Sprout, type LucideIcon } from "lucide-react";
+import { Boxes, FlaskConical, LayoutDashboard, ShoppingBasket, Sprout, type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   href: string;
@@ -12,4 +12,5 @@ export const navItems: NavItem[] = [
   { href: "/crops", label: "Crops", icon: Sprout },
   { href: "/harvests", label: "Harvests", icon: ShoppingBasket },
   { href: "/fertilizers", label: "Fertilizers", icon: FlaskConical },
+  { href: "/inventory", label: "Inventory", icon: Boxes },
 ];
