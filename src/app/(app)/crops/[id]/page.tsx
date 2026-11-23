@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil, Plus } from "lucide-react";
+import { HandCoins, Pencil, Plus, TrendingUp, Wallet } from "lucide-react";
+import { CropAvatar, ProgressBar } from "@/components/crop-avatar";
+import { StatCard } from "@/components/stat-card";
 import { HarvestQuantityBadge, HarvestTimingBadge } from "@/components/harvest-badges";
 import { harvestRowClass, isCompleted } from "@/lib/harvest";
 import { prisma } from "@/lib/prisma";
@@ -53,20 +55,52 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
     <>
       <PageHeader
         title={crop.name}
-        description={crop.notes ?? undefined}
+        eyebrow={[crop.variety, crop.bedLocation].filter(Boolean).join(" · ") || "Crop cycle"}
+        description={crop.notes ?? `Planted ${formatDate(crop.plantedDate)} · ${crop.plantedQuantity} plants`}
         actions={
           <>
-            <Link href={`/crops/${crop.id}/edit`} className={buttonVariants({ variant: "outline" })}>
+            <Badge variant={cropStatusVariant[crop.status]} className="bg-white">
+              {enumLabel(crop.status)}
+            </Badge>
+            <Link href={`/crops/${crop.id}/edit`} className={buttonVariants({ variant: "gold" })}>
               <Pencil /> Edit
             </Link>
-            <DeleteButton
-              action={deleteCrop}
-              id={crop.id}
-              confirmText="Delete this crop? Crops with sales are marked completed instead."
-            />
+            <span className="rounded-lg bg-white">
+              <DeleteButton
+                action={deleteCrop}
+                id={crop.id}
+                confirmText="Delete this crop? Crops with sales are marked completed instead."
+              />
+            </span>
           </>
         }
       />
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="animate-fade-up rounded-2xl border border-gray-200/70 bg-white/95 p-5 shadow-soft">
+          <div className="flex items-center gap-3">
+            <CropAvatar name={crop.name} />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Yield progress</p>
+              <p className="text-xl font-extrabold text-gray-900">
+                {crop.expectedYieldKg > 0 ? Math.round((harvested / crop.expectedYieldKg) * 100) : 0}%
+              </p>
+            </div>
+          </div>
+          <ProgressBar className="mt-4" value={crop.expectedYieldKg > 0 ? (harvested / crop.expectedYieldKg) * 100 : 0} />
+          <p className="mt-2 text-xs text-gray-500">
+            {formatKg(harvested)} of {formatKg(crop.expectedYieldKg)}
+          </p>
+        </div>
+        <StatCard label="Sold" value={formatKg(profit?.soldKg ?? 0)} icon={HandCoins} tone="sky" />
+        <StatCard label="Revenue" value={formatCurrency(profit?.revenue ?? 0)} icon={TrendingUp} tone="gold" />
+        <StatCard
+          label={(profit?.profit ?? 0) >= 0 ? "Net profit" : "Net loss"}
+          value={formatCurrency(profit?.profit ?? 0)}
+          icon={Wallet}
+          tone={(profit?.profit ?? 0) >= 0 ? "green" : "red"}
+        />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
