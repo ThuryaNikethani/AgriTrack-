@@ -58,7 +58,7 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
         title="Harvest Management"
         description="Scheduled vs actual harvests. Late, overdue and below-target harvests are highlighted."
         actions={
-          <Link href="/harvests/new" className={buttonVariants()}>
+          <Link href="/harvests/new" className={buttonVariants({ variant: "gold" })}>
             <Plus /> Schedule harvest
           </Link>
         }

@@ -36,7 +36,7 @@ export default async function CropsPage({
         title="Crop Management"
         description="Vegetables currently planted in the polytunnel and their lifecycle."
         actions={
-          <Link href="/crops/new" className={buttonVariants()}>
+          <Link href="/crops/new" className={buttonVariants({ variant: "gold" })}>
             <Plus /> Add crop
           </Link>
         }
