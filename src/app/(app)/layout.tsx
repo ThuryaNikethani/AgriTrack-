@@ -1,7 +1,18 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { UserMenu } from "@/components/layout/user-menu";
+import { requireUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell isAdmin={false}>{children}</AppShell>;
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const user = await requireUser();
+
+  return (
+    <AppShell
+      isAdmin={user.role === "ADMIN"}
+      topbar={<UserMenu name={user.name ?? user.email ?? "User"} role={user.role} />}
+    >
+      {children}
+    </AppShell>
+  );
 }
