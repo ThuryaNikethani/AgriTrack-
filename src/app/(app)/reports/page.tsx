@@ -6,7 +6,14 @@ import { ReportView } from "@/components/report-view";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/form-controls";
 import { cropLabel } from "@/lib/crops";
-import { REPORT_TYPES, buildReport, reportQuery, resolveReportParams, type ReportType } from "@/lib/reports";
+import {
+  REPORT_TYPES,
+  buildReport,
+  reportConfig,
+  reportQuery,
+  resolveReportParams,
+  type ReportType,
+} from "@/lib/reports";
 
 export const metadata = { title: "Reports" };
 
@@ -22,7 +29,7 @@ export default async function ReportsPage({
     prisma.crop.findMany({ orderBy: [{ status: "asc" }, { name: "asc" }] }),
   ]);
   const query = reportQuery({ type, from: range.fromInput, to: range.toInput, cropId });
-  const cfg = REPORT_TYPES[type];
+  const cfg = reportConfig(type);
 
   return (
     <>
@@ -66,7 +73,7 @@ export default async function ReportsPage({
               ))}
             </Select>
           </div>
-          {type !== "inventory" && (
+          {!cfg.snapshot && (
             <>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="from">From</Label>

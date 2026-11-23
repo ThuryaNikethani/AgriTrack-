@@ -10,20 +10,53 @@ import { getStockStatus, stockBadge } from "@/lib/stock";
 import { enumLabel, toNumber } from "@/lib/utils";
 import { formatLkr, type Report, type ReportRow } from "@/lib/report-format";
 
+/** Sidebar module each report belongs to (used to group reports and to show them on each page). */
+export const REPORT_MODULES = [
+  "Crops",
+  "Harvests",
+  "Fertilizers",
+  "Inventory",
+  "Sales",
+  "Expenses",
+  "Finance",
+] as const;
+export type ReportModule = (typeof REPORT_MODULES)[number];
+
+type ReportConfig = {
+  label: string;
+  module: ReportModule;
+  /** Defaults to today when no date range is given. */
+  daily: boolean;
+  usesCrop: boolean;
+  /** Current-state report: the date range is not used. */
+  snapshot?: boolean;
+};
+
 export const REPORT_TYPES = {
-  cultivation: { label: "Daily Cultivation Report", daily: true, usesCrop: true },
-  harvest: { label: "Daily Harvest Report", daily: true, usesCrop: true },
-  sales: { label: "Daily Sales Report", daily: true, usesCrop: true },
-  expenses: { label: "Daily Expense Report", daily: true, usesCrop: true },
-  "monthly-financial": { label: "Monthly Financial Report", daily: false, usesCrop: false },
-  "annual-financial": { label: "Annual Financial Report", daily: false, usesCrop: false },
-  "crop-performance": { label: "Crop Performance Report", daily: false, usesCrop: true },
-  "fertilizer-usage": { label: "Fertilizer Usage Report", daily: false, usesCrop: true },
-  "profit-loss": { label: "Profit & Loss Report", daily: false, usesCrop: false },
-  inventory: { label: "Inventory Report", daily: false, usesCrop: false },
-} as const;
+  crops: { label: "Crop Register Report", module: "Crops", daily: false, usesCrop: true },
+  cultivation: { label: "Daily Cultivation Report", module: "Crops", daily: true, usesCrop: true },
+  "crop-performance": { label: "Crop Performance Report", module: "Crops", daily: false, usesCrop: true },
+  harvest: { label: "Daily Harvest Report", module: "Harvests", daily: true, usesCrop: true },
+  "fertilizer-usage": { label: "Fertilizer Usage Report", module: "Fertilizers", daily: false, usesCrop: true },
+  "fertilizer-stock": { label: "Fertilizer Stock & Purchases Report", module: "Fertilizers", daily: false, usesCrop: false },
+  inventory: { label: "Inventory Report", module: "Inventory", daily: false, usesCrop: false, snapshot: true },
+  "inventory-movements": { label: "Inventory Movements Report", module: "Inventory", daily: false, usesCrop: false },
+  sales: { label: "Daily Sales Report", module: "Sales", daily: true, usesCrop: true },
+  expenses: { label: "Daily Expense Report", module: "Expenses", daily: true, usesCrop: true },
+  "monthly-financial": { label: "Monthly Financial Report", module: "Finance", daily: false, usesCrop: false },
+  "annual-financial": { label: "Annual Financial Report", module: "Finance", daily: false, usesCrop: false },
+  "profit-loss": { label: "Profit & Loss Report", module: "Finance", daily: false, usesCrop: false },
+} satisfies Record<string, ReportConfig>;
 
 export type ReportType = keyof typeof REPORT_TYPES;
+
+export function reportConfig(type: ReportType): ReportConfig {
+  return REPORT_TYPES[type];
+}
+
+export function reportsForModule(module: ReportModule): ReportType[] {
+  return (Object.keys(REPORT_TYPES) as ReportType[]).filter((t) => REPORT_TYPES[t].module === module);
+}
 
 export type ReportParams = { type?: string; from?: string; to?: string; cropId?: string };
 
@@ -57,7 +90,9 @@ export async function buildReport(params: ReportParams): Promise<Report> {
   const base = {
     type,
     title: REPORT_TYPES[type].label,
-    subtitle: type === "inventory" ? `As at ${format(new Date(), "dd MMM yyyy")}` : subtitle(range, crop ? cropLabel(crop) : undefined),
+    subtitle: reportConfig(type).snapshot
+      ? `As at ${format(new Date(), "dd MMM yyyy")}`
+      : subtitle(range, crop ? cropLabel(crop) : undefined),
     generatedAt: format(new Date(), "dd MMM yyyy HH:mm"),
   };
   const dates = { gte: range.from, lte: range.to };
@@ -471,6 +506,204 @@ export async function buildReport(params: ReportParams): Promise<Report> {
           },
         ],
         notes: ["Net Profit = Total Revenue - Total Expenses"],
+      };
+    }
+
+    case "crops": {
+      // Crops planted in the period plus every crop still growing / harvesting.
+      const crops = await prisma.crop.findMany({
+        where: {
+          id: cropId,
+          OR: [{ plantedDate: dates }, { status: { in: ["GROWING", "HARVESTING"] } }],
+        },
+        include: { harvests: { select: { actualQuantityKg: true, actualDate: true } } },
+        orderBy: { plantedDate: "asc" },
+      });
+      const rows: ReportRow[] = crops.map((c) => {
+        const harvested = c.harvests.reduce((s, h) => s + (h.actualQuantityKg ?? 0), 0);
+        return {
+          crop: c.name,
+          variety: c.variety,
+          bed: c.bedLocation,
+          planted: c.plantedDate.toISOString(),
+          expectedHarvest: c.expectedHarvestDate.toISOString(),
+          plants: c.plantedQuantity,
+          expectedYield: c.expectedYieldKg,
+          harvested,
+          progress: c.expectedYieldKg > 0 ? (harvested / c.expectedYieldKg) * 100 : null,
+          status: enumLabel(c.status),
+          _highlight: c.status === "FAILED" ? "danger" : null,
+        };
+      });
+      const count = (s: string) => crops.filter((c) => c.status === s).length;
+      return {
+        ...base,
+        summary: [
+          { label: "Crops", value: String(crops.length) },
+          { label: "Growing", value: String(count("GROWING")) },
+          { label: "Harvesting", value: String(count("HARVESTING")) },
+          { label: "Completed", value: String(count("COMPLETED")) },
+          { label: "Total plants", value: String(crops.reduce((s, c) => s + c.plantedQuantity, 0)) },
+          { label: "Total harvested", value: `${sum(rows, "harvested").toFixed(2)} kg` },
+        ],
+        sections: [
+          {
+            columns: [
+              { key: "crop", header: "Vegetable" },
+              { key: "variety", header: "Variety" },
+              { key: "bed", header: "Bed" },
+              { key: "planted", header: "Planted", format: "date" },
+              { key: "expectedHarvest", header: "Expected harvest", format: "date" },
+              { key: "plants", header: "Plants", format: "number" },
+              { key: "expectedYield", header: "Expected yield", format: "kg" },
+              { key: "harvested", header: "Harvested", format: "kg" },
+              { key: "progress", header: "Progress", format: "percent" },
+              { key: "status", header: "Status" },
+            ],
+            rows,
+            totals: {
+              crop: "Total",
+              plants: sum(rows, "plants"),
+              expectedYield: sum(rows, "expectedYield"),
+              harvested: sum(rows, "harvested"),
+            },
+          },
+        ],
+        notes: ["Includes crops planted in the period and all crops still growing or harvesting."],
+      };
+    }
+
+    case "fertilizer-stock": {
+      const [fertilizers, purchases] = await Promise.all([
+        prisma.fertilizer.findMany({
+          orderBy: { name: "asc" },
+          include: { usages: { where: { date: dates }, select: { quantity: true } } },
+        }),
+        prisma.fertilizerPurchase.findMany({
+          where: { date: dates },
+          include: { fertilizer: true },
+          orderBy: { date: "asc" },
+        }),
+      ]);
+      const stockRows: ReportRow[] = fertilizers.map((f) => {
+        const status = getStockStatus(f.currentStock, f.reorderLevel);
+        return {
+          name: f.name,
+          type: enumLabel(f.type),
+          purchased: purchases.filter((p) => p.fertilizerId === f.id).reduce((s, p) => s + p.quantity, 0),
+          used: f.usages.reduce((s, u) => s + u.quantity, 0),
+          stock: f.currentStock,
+          reorder: f.reorderLevel,
+          unit: f.unit,
+          status: stockBadge[status].label,
+          _highlight: status === "OUT" ? "danger" : status === "LOW" ? "warning" : null,
+        };
+      });
+      const purchaseRows: ReportRow[] = purchases.map((p) => ({
+        date: p.date.toISOString(),
+        fertilizer: p.fertilizer.name,
+        quantity: p.quantity,
+        unit: p.fertilizer.unit,
+        cost: toNumber(p.totalCost),
+        unitCost: p.quantity > 0 ? toNumber(p.totalCost) / p.quantity : null,
+      }));
+      return {
+        ...base,
+        summary: [
+          { label: "Fertilizer types", value: String(fertilizers.length) },
+          { label: "Purchases", value: String(purchases.length) },
+          { label: "Purchase cost", value: formatLkr(sum(purchaseRows, "cost")) },
+          { label: "To reorder", value: String(stockRows.filter((r) => r._highlight).length) },
+        ],
+        sections: [
+          {
+            title: "Stock position",
+            columns: [
+              { key: "name", header: "Fertilizer" },
+              { key: "type", header: "Type" },
+              { key: "purchased", header: "Purchased", format: "number" },
+              { key: "used", header: "Used", format: "number" },
+              { key: "stock", header: "In stock now", format: "number" },
+              { key: "reorder", header: "Reorder level", format: "number" },
+              { key: "unit", header: "Unit" },
+              { key: "status", header: "Status" },
+            ],
+            rows: stockRows,
+          },
+          {
+            title: "Purchases",
+            columns: [
+              { key: "date", header: "Date", format: "date" },
+              { key: "fertilizer", header: "Fertilizer" },
+              { key: "quantity", header: "Quantity", format: "number" },
+              { key: "unit", header: "Unit" },
+              { key: "unitCost", header: "Unit cost", format: "currency" },
+              { key: "cost", header: "Total cost", format: "currency" },
+            ],
+            rows: purchaseRows,
+            totals: { date: "Total", cost: sum(purchaseRows, "cost") },
+          },
+        ],
+        notes: ["Purchased and used quantities are for the selected period. Highlighted fertilizers need reordering."],
+      };
+    }
+
+    case "inventory-movements": {
+      const movements = await prisma.inventoryMovement.findMany({
+        where: { date: dates },
+        include: { item: true },
+        orderBy: { date: "asc" },
+      });
+      const rows: ReportRow[] = movements.map((m) => ({
+        date: m.date.toISOString(),
+        item: m.item.name,
+        category: enumLabel(m.item.category),
+        movement: m.type === "IN" ? "Stock in" : "Stock out",
+        quantity: m.quantity,
+        unit: m.item.unit,
+        note: m.note,
+      }));
+      const totals = new Map<string, { item: string; unit: string; inQty: number; outQty: number; stock: number }>();
+      for (const m of movements) {
+        const t = totals.get(m.itemId) ?? { item: m.item.name, unit: m.item.unit, inQty: 0, outQty: 0, stock: m.item.quantity };
+        if (m.type === "IN") t.inQty += m.quantity;
+        else t.outQty += m.quantity;
+        totals.set(m.itemId, t);
+      }
+      return {
+        ...base,
+        summary: [
+          { label: "Movements", value: String(movements.length) },
+          { label: "Stock in", value: String(movements.filter((m) => m.type === "IN").length) },
+          { label: "Stock out", value: String(movements.filter((m) => m.type === "OUT").length) },
+          { label: "Items affected", value: String(totals.size) },
+        ],
+        sections: [
+          {
+            title: "Summary by item",
+            columns: [
+              { key: "item", header: "Item" },
+              { key: "inQty", header: "Stock in", format: "number" },
+              { key: "outQty", header: "Stock out", format: "number" },
+              { key: "stock", header: "In stock now", format: "number" },
+              { key: "unit", header: "Unit" },
+            ],
+            rows: [...totals.values()].map((t) => ({ ...t })),
+          },
+          {
+            title: "Movement log",
+            columns: [
+              { key: "date", header: "Date", format: "date" },
+              { key: "item", header: "Item" },
+              { key: "category", header: "Category" },
+              { key: "movement", header: "Movement" },
+              { key: "quantity", header: "Quantity", format: "number" },
+              { key: "unit", header: "Unit" },
+              { key: "note", header: "Note" },
+            ],
+            rows,
+          },
+        ],
       };
     }
 
