@@ -3,6 +3,7 @@ import { addDays, endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { AlertTriangle, Building2, PackageX, Sprout, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { DashboardHero } from "@/components/dashboard-hero";
+import { CropAvatar, CropCell } from "@/components/crop-avatar";
 import { requireUser } from "@/lib/session";
 import { StatCard } from "@/components/stat-card";
 import { HarvestBarChart, IncomeExpenseChart } from "@/components/charts";
@@ -157,10 +158,7 @@ export default async function DashboardPage() {
               {attentionHarvests.map((h) => (
                 <TR key={h.id} className={harvestRowClass(h)}>
                   <TD>
-                    <Link href={`/crops/${h.crop.id}`} className="font-medium text-green-700 hover:underline">
-                      {h.crop.name}
-                    </Link>
-                    {h.crop.bedLocation && <span className="ml-1 text-xs text-gray-500">{h.crop.bedLocation}</span>}
+                    <CropCell id={h.crop.id} name={h.crop.name} sub={h.crop.bedLocation} />
                   </TD>
                   <TD>{formatDate(h.scheduledDate)}</TD>
                   <TD>{formatKg(h.expectedQuantityKg)}</TD>
@@ -230,11 +228,14 @@ export default async function DashboardPage() {
               <ul className="divide-y divide-gray-100">
                 {recentCompleted.map((h) => (
                   <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{h.crop.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(h.actualDate)} - {formatKg(h.actualQuantityKg)}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <CropAvatar name={h.crop.name} size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{h.crop.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatDate(h.actualDate)} - {formatKg(h.actualQuantityKg)}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <HarvestTimingBadge harvest={h} />
@@ -276,15 +277,20 @@ export default async function DashboardPage() {
               <ul className="divide-y divide-gray-100">
                 {recentSales.map((s) => (
                   <li key={s.id} className="flex items-center justify-between gap-3 py-2.5">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {s.crop.name} - {formatKg(s.quantityKg)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(s.saleDate)} - {customerTypeLabel[s.customerType]}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <CropAvatar name={s.crop.name} size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {s.crop.name} - {formatKg(s.quantityKg)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatDate(s.saleDate)} - {customerTypeLabel[s.customerType]}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold">{formatCurrency(s.totalAmount)}</span>
+                    <span className="rounded-lg bg-gold-50 px-2 py-1 text-sm font-bold text-gold-700">
+                      {formatCurrency(s.totalAmount)}
+                    </span>
                   </li>
                 ))}
               </ul>

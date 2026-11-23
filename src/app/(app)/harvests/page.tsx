@@ -3,6 +3,7 @@ import { AlertTriangle, CalendarClock, ClipboardCheck, Plus, TrendingDown } from
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { FilterTabs } from "@/components/filter-tabs";
+import { CropCell } from "@/components/crop-avatar";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -107,10 +108,7 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
             {visible.map((h) => (
               <TR key={h.id} className={cn(harvestRowClass(h))}>
                 <TD>
-                  <Link href={`/crops/${h.crop.id}`} className="font-medium text-green-700 hover:underline">
-                    {h.crop.name}
-                  </Link>
-                  {h.crop.bedLocation && <span className="ml-1 text-xs text-gray-500">{h.crop.bedLocation}</span>}
+                  <CropCell id={h.crop.id} name={h.crop.name} sub={h.crop.bedLocation} />
                 </TD>
                 <TD>{formatDate(h.scheduledDate)}</TD>
                 <TD>{formatKg(h.expectedQuantityKg)}</TD>

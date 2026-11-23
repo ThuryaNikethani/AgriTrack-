@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, FlaskConical, PackageX } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { CropCell } from "@/components/crop-avatar";
 import { StatCard } from "@/components/stat-card";
 import { StockBadge } from "@/components/stock-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,10 +102,7 @@ export default async function FertilizersPage() {
                     <TD>{formatDate(u.date)}</TD>
                     <TD>{u.fertilizer.name}</TD>
                     <TD>
-                      <Link href={`/crops/${u.crop.id}`} className="text-green-700 hover:underline">
-                        {u.crop.name}
-                      </Link>
-                      {u.crop.bedLocation && <span className="ml-1 text-xs text-gray-500">{u.crop.bedLocation}</span>}
+                      <CropCell id={u.crop.id} name={u.crop.name} sub={u.crop.bedLocation} />
                     </TD>
                     <TD className="text-right">
                       {formatNumber(u.quantity)} {u.fertilizer.unit}

@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Building2, Factory, Store, Wallet } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { CropCell } from "@/components/crop-avatar";
 import { StatCard } from "@/components/stat-card";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { DeleteButton } from "@/components/form-helpers";
@@ -93,9 +93,7 @@ export default async function SalesPage({
                   <TR key={s.id}>
                     <TD>{formatDate(s.saleDate)}</TD>
                     <TD>
-                      <Link href={`/crops/${s.crop.id}`} className="text-green-700 hover:underline">
-                        {s.crop.name}
-                      </Link>
+                      <CropCell id={s.crop.id} name={s.crop.name} sub={s.crop.bedLocation} />
                     </TD>
                     <TD className="text-right">{formatKg(s.quantityKg)}</TD>
                     <TD className="text-right">{formatCurrency(s.unitPrice)}</TD>
