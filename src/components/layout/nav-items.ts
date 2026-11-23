@@ -9,6 +9,7 @@ import {
   Receipt,
   ShoppingBasket,
   Sprout,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,4 +31,5 @@ export const navItems: NavItem[] = [
   { href: "/fertilizers", label: "Fertilizers", icon: FlaskConical },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/users", label: "Users", icon: Users, adminOnly: true },
 ];
