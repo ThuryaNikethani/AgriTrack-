@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
+import { HarvestQuantityBadge, HarvestTimingBadge } from "@/components/harvest-badges";
+import { harvestRowClass, isCompleted } from "@/lib/harvest";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,7 +75,12 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Harvest schedule</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Harvest schedule
+              <Link href={`/harvests/new?cropId=${crop.id}`} className={buttonVariants({ variant: "secondary", size: "sm" })}>
+                <Plus /> Schedule
+              </Link>
+            </CardTitle>
           </CardHeader>
           <Table>
             <THead>
@@ -82,16 +89,30 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
                 <TH>Expected</TH>
                 <TH>Harvested on</TH>
                 <TH>Actual</TH>
+                <TH>Timing</TH>
+                <TH>Quantity</TH>
+                <TH />
               </tr>
             </THead>
             <TBody>
-              {crop.harvests.length === 0 && <EmptyRow colSpan={4} />}
+              {crop.harvests.length === 0 && <EmptyRow colSpan={7} />}
               {crop.harvests.map((h) => (
-                <TR key={h.id}>
+                <TR key={h.id} className={harvestRowClass(h)}>
                   <TD>{formatDate(h.scheduledDate)}</TD>
                   <TD>{formatKg(h.expectedQuantityKg)}</TD>
                   <TD>{formatDate(h.actualDate)}</TD>
                   <TD>{h.actualQuantityKg != null ? formatKg(h.actualQuantityKg) : "-"}</TD>
+                  <TD>
+                    <HarvestTimingBadge harvest={h} />
+                  </TD>
+                  <TD>
+                    <HarvestQuantityBadge harvest={h} />
+                  </TD>
+                  <TD>
+                    <Link href={`/harvests/${h.id}/record`} className="text-xs text-green-700 hover:underline">
+                      {isCompleted(h) ? "Edit" : "Record"}
+                    </Link>
+                  </TD>
                 </TR>
               ))}
             </TBody>
