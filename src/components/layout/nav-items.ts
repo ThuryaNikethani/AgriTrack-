@@ -1,4 +1,4 @@
-import { LayoutDashboard, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Sprout, type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   href: string;
@@ -9,4 +9,5 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/crops", label: "Crops", icon: Sprout },
 ];
