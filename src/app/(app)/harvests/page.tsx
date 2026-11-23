@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, CalendarClock, ClipboardCheck, Plus, TrendingDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { FilterTabs } from "@/components/filter-tabs";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -37,8 +38,8 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
   const late = harvests.filter((h) => getTiming(h).status === "LATE");
   const below = harvests.filter((h) => getQuantity(h)?.status === "BELOW");
 
-  const visible = harvests.filter((h) => {
-    switch (filter) {
+  const matches = (h: (typeof harvests)[number], f: Filter) => {
+    switch (f) {
       case "pending":
         return !isCompleted(h);
       case "overdue":
@@ -50,7 +51,11 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
       default:
         return true;
     }
-  });
+  };
+  const visible = harvests.filter((h) => matches(h, filter));
+  const counts = Object.fromEntries(
+    (Object.keys(FILTERS) as Filter[]).map((f) => [f, harvests.filter((h) => matches(h, f)).length]),
+  ) as Record<Filter, number>;
 
   return (
     <>
@@ -71,18 +76,15 @@ export default async function HarvestsPage({ searchParams }: { searchParams: Pro
         <StatCard label="Below target" value={below.length} icon={TrendingDown} tone="red" hint="Less than expected quantity" />
       </div>
 
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(FILTERS) as Filter[]).map((f) => (
-            <Link
-              key={f}
-              href={f === "all" ? "/harvests" : `/harvests?filter=${f}`}
-              className={buttonVariants({ variant: filter === f ? "default" : "outline", size: "sm" })}
-            >
-              {FILTERS[f]}
-            </Link>
-          ))}
-        </div>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <FilterTabs
+          tabs={(Object.keys(FILTERS) as Filter[]).map((f) => ({
+            href: f === "all" ? "/harvests" : `/harvests?filter=${f}`,
+            label: FILTERS[f],
+            active: filter === f,
+            count: counts[f],
+          }))}
+        />
         <HarvestLegend />
       </div>
 

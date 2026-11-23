@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
+import { FilterTabs } from "@/components/filter-tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -42,17 +43,14 @@ export default async function CropsPage({
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {filters.map((f) => (
-          <Link
-            key={f ?? "all"}
-            href={f ? `/crops?status=${f}` : "/crops"}
-            className={buttonVariants({ variant: validStatus === f ? "default" : "outline", size: "sm" })}
-          >
-            {f ? enumLabel(f) : "All"}
-          </Link>
-        ))}
-      </div>
+      <FilterTabs
+        className="mb-6"
+        tabs={filters.map((f) => ({
+          href: f ? `/crops?status=${f}` : "/crops",
+          label: f ? enumLabel(f) : "All",
+          active: validStatus === f,
+        }))}
+      />
 
       <Card>
         <Table>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { startOfMonth, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import { Percent, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { FilterTabs } from "@/components/filter-tabs";
 import { StatCard } from "@/components/stat-card";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { BreakdownPie, CropProfitChart, IncomeExpenseChart } from "@/components/charts";
@@ -51,17 +52,14 @@ export default async function FinancePage({
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {(Object.keys(VIEWS) as Granularity[]).map((v) => (
-          <Link
-            key={v}
-            href={`/finance?view=${v}`}
-            className={buttonVariants({ variant: view === v ? "default" : "outline", size: "sm" })}
-          >
-            {VIEWS[v].label}
-          </Link>
-        ))}
-      </div>
+      <FilterTabs
+        className="mb-4"
+        tabs={(Object.keys(VIEWS) as Granularity[]).map((v) => ({
+          href: `/finance?view=${v}`,
+          label: VIEWS[v].label,
+          active: view === v,
+        }))}
+      />
 
       <DateRangeFilter from={range.fromInput} to={range.toInput} hidden={{ view }} />
 
