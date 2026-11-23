@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { NotificationBell } from "@/components/layout/notification-bell";
 import { UserMenu } from "@/components/layout/user-menu";
 import { requireUser } from "@/lib/session";
 
@@ -10,7 +11,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       isAdmin={user.role === "ADMIN"}
-      topbar={<UserMenu name={user.name ?? user.email ?? "User"} role={user.role} />}
+      topbar={
+        <>
+          <NotificationBell />
+          <UserMenu name={user.name ?? user.email ?? "User"} role={user.role} />
+        </>
+      }
     >
       {children}
     </AppShell>

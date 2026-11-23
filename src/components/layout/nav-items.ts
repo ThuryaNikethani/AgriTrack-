@@ -1,4 +1,5 @@
 import {
+  Bell,
   Boxes,
   FlaskConical,
   HandCoins,
@@ -24,4 +25,5 @@ export const navItems: NavItem[] = [
   { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/fertilizers", label: "Fertilizers", icon: FlaskConical },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/notifications", label: "Notifications", icon: Bell },
 ];
