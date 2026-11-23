@@ -28,8 +28,8 @@ export function FormMessage({ state }: { state: ActionState }) {
     <p
       className={
         state.ok
-          ? "rounded-md bg-green-50 px-3 py-2 text-sm text-green-800"
-          : "rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+          ? "rounded-xl bg-green-50 px-3.5 py-2.5 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-200"
+          : "rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-200"
       }
     >
       {state.message}
