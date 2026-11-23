@@ -1,4 +1,4 @@
-import { format, startOfDay, startOfYear, subYears } from "date-fns";
+import { endOfMonth, format, startOfDay, startOfYear, subYears } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { cropLabel } from "@/lib/crops";
 import { parseDateRange, type DateRange } from "@/lib/date-range";
@@ -105,9 +105,35 @@ function subtitle(range: DateRange, filters: string[] = []) {
   return [period, ...filters].join(" | ");
 }
 
+/** Letterhead period: "November 2026", "2026", "23 November 2026" or a date range. */
+function periodLabel(range: DateRange): string {
+  const { from, to } = range;
+  const sameDay = range.fromInput === range.toInput;
+  if (sameDay) return format(from, "d MMMM yyyy");
+  const fullMonth =
+    from.getDate() === 1 &&
+    from.getMonth() === to.getMonth() &&
+    from.getFullYear() === to.getFullYear() &&
+    to.getDate() === endOfMonth(from).getDate();
+  if (fullMonth) return format(from, "MMMM yyyy");
+  const fullYear =
+    range.fromInput === `${from.getFullYear()}-01-01` && range.toInput === `${from.getFullYear()}-12-31`;
+  if (fullYear) return format(from, "yyyy");
+  return `${format(from, "d MMM yyyy")} - ${format(to, "d MMM yyyy")}`;
+}
+
+/** Current time in Sri Lanka, e.g. "23 Nov 2026 · 2:36 PM". */
+function printedAt(): string {
+  const tz = "Asia/Colombo";
+  const now = new Date();
+  const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: tz }).format(now);
+  const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: tz }).format(now);
+  return `${date} · ${time}`;
+}
+
 const sum = (rows: ReportRow[], key: string) => rows.reduce((s, r) => s + toNumber(r[key]), 0);
 
-export async function buildReport(params: ReportParams): Promise<Report> {
+export async function buildReport(params: ReportParams, printedBy?: string): Promise<Report> {
   const { type, range, cropId, customer, category } = resolveReportParams(params);
   const crop = cropId ? await prisma.crop.findUnique({ where: { id: cropId } }) : null;
   const filters = [
@@ -115,13 +141,15 @@ export async function buildReport(params: ReportParams): Promise<Report> {
     customer ? `Sold to: ${customerTypeLabel[customer]}` : null,
     category ? `Category: ${expenseCategoryLabel[category]}` : null,
   ].filter((f): f is string => f !== null);
+  const snapshot = reportConfig(type).snapshot;
   const base = {
     type,
     title: REPORT_TYPES[type].label,
-    subtitle: reportConfig(type).snapshot
-      ? `As at ${format(new Date(), "dd MMM yyyy")}`
-      : subtitle(range, filters),
-    generatedAt: format(new Date(), "dd MMM yyyy HH:mm"),
+    subtitle: snapshot ? `As at ${format(new Date(), "dd MMM yyyy")}` : subtitle(range, filters),
+    period: snapshot ? `As at ${format(new Date(), "d MMMM yyyy")}` : periodLabel(range),
+    filters,
+    generatedAt: printedAt(),
+    printedBy,
   };
   const dates = { gte: range.from, lte: range.to };
 

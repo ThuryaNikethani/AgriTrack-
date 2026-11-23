@@ -4,7 +4,6 @@ import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from "@
 import { formatCell, isNumericFormat, type Report, type ReportSection } from "@/lib/report-format";
 
 const GREEN = "#1d632d";
-const GOLD = "#c9932a";
 
 /** Company logo from /public, embedded as a data URI (null if the file is missing). */
 function loadLogo(): string | null {
@@ -15,13 +14,16 @@ function loadLogo(): string | null {
 
 const styles = StyleSheet.create({
   page: { padding: 28, fontSize: 8.5, fontFamily: "Helvetica", color: "#1f2937" },
-  header: { flexDirection: "row", alignItems: "center", paddingBottom: 8, marginBottom: 2 },
-  logo: { width: 46, height: 46, marginRight: 12 },
-  goldRule: { height: 2.5, backgroundColor: GOLD, marginBottom: 10 },
-  company: { fontSize: 9, color: GREEN, fontFamily: "Helvetica-Bold", letterSpacing: 1 },
-  brand: { fontSize: 8, color: GOLD, fontFamily: "Helvetica-Bold", marginTop: 1 },
-  title: { fontSize: 16, fontFamily: "Helvetica-Bold", marginTop: 2 },
-  subtitle: { fontSize: 9, color: "#4b5563", marginTop: 2 },
+  // Letterhead: logo left, centred company / report / print lines, thick dark rule.
+  header: { flexDirection: "row", alignItems: "center", paddingBottom: 10 },
+  logo: { width: 72, height: 72 },
+  headerText: { flex: 1, alignItems: "center", paddingHorizontal: 8 },
+  headerSpacer: { width: 72 },
+  company: { fontSize: 22, color: GREEN, fontFamily: "Helvetica-Bold", letterSpacing: 0.5 },
+  title: { fontSize: 13, fontFamily: "Helvetica-Bold", color: "#111827", marginTop: 6 },
+  printed: { fontSize: 9, color: "#4b5563", marginTop: 5 },
+  rule: { height: 3.5, backgroundColor: "#082410", marginBottom: 8 },
+  filters: { fontSize: 9, textAlign: "center", color: "#374151", marginBottom: 8 },
   summary: { flexDirection: "row", flexWrap: "wrap", marginBottom: 10 },
   summaryItem: { width: "25%", padding: 4 },
   summaryLabel: { fontSize: 7.5, color: "#6b7280", textTransform: "uppercase" },
@@ -97,15 +99,21 @@ function ReportDocument({ report, logo }: { report: Report; logo: string | null 
       <Page size="A4" orientation={wide ? "landscape" : "portrait"} style={styles.page}>
         <View style={styles.header}>
           {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
-          {logo && <Image src={logo} style={styles.logo} />}
-          <View>
-            <Text style={styles.company}>ATHUKORALA GROUP</Text>
-            <Text style={styles.brand}>AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</Text>
-            <Text style={styles.title}>{report.title}</Text>
-            <Text style={styles.subtitle}>{report.subtitle}</Text>
+          {logo ? <Image src={logo} style={styles.logo} /> : <View style={styles.headerSpacer} />}
+          <View style={styles.headerText}>
+            <Text style={styles.company}>ATHUKORALA GROUP (PVT) LTD</Text>
+            <Text style={styles.title}>
+              {report.title} · {report.period}
+            </Text>
+            <Text style={styles.printed}>
+              Printed on: {report.generatedAt}
+              {report.printedBy ? ` | Printed by: ${report.printedBy}` : ""}
+            </Text>
           </View>
+          <View style={styles.headerSpacer} />
         </View>
-        <View style={styles.goldRule} />
+        <View style={styles.rule} />
+        {report.filters.length > 0 && <Text style={styles.filters}>{report.filters.join(" | ")}</Text>}
 
         <View style={styles.summary}>
           {report.summary.map((s) => (
@@ -127,7 +135,7 @@ function ReportDocument({ report, logo }: { report: Report; logo: string | null 
         ))}
 
         <View style={styles.footer} fixed>
-          <Text>Generated {report.generatedAt}</Text>
+          <Text>Athukorala Group (Pvt) Ltd · AgriTrack · {report.title}</Text>
           <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>

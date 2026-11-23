@@ -8,6 +8,12 @@ export async function requireUser() {
   return session.user;
 }
 
+/** "Name (Role)" shown as "Printed by" on reports. */
+export function printedByLabel(user: { name?: string | null; email?: string | null; role: string }) {
+  const role = user.role === "ADMIN" ? "Admin" : "Staff";
+  return `${user.name ?? user.email ?? "User"} (${role})`;
+}
+
 /** Returns the signed-in admin or redirects to the dashboard. */
 export async function requireAdmin() {
   const user = await requireUser();

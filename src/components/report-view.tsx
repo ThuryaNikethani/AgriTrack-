@@ -5,16 +5,26 @@ import { formatCell, isNumericFormat, type Report } from "@/lib/report-format";
 export function ReportView({ report }: { report: Report }) {
   return (
     <article className="report rounded-lg border border-gray-200 bg-white p-6 shadow-sm print:border-0 print:p-0 print:shadow-none">
-      <header className="mb-5 flex items-center gap-4 border-b-[3px] border-gold-400 pb-4">
+      {/* Company letterhead: logo left, company / report / print details centred, thick rule below. */}
+      <header className="mb-4 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-b-[5px] border-green-950 pb-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/athukorala-logo.png" alt="Athukorala Group" className="h-16 w-16 rounded-full object-contain" />
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-green-700">Athukorala Group</p>
-          <p className="text-xs font-semibold text-gold-600">AgriTrack - Kurunduwatta Villa &amp; Cottages Polytunnel</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold text-green-950">{report.title}</h2>
-          <p className="text-sm text-gray-600">{report.subtitle}</p>
+        <img src="/athukorala-logo.png" alt="Athukorala Group" className="h-24 w-24 object-contain sm:h-28 sm:w-28" />
+        <div className="text-center">
+          <p className="text-2xl font-extrabold tracking-wide text-green-700 sm:text-4xl">ATHUKORALA GROUP (PVT) LTD</p>
+          <p className="mt-2 text-lg font-bold text-gray-900 sm:text-xl">
+            {report.title} · {report.period}
+          </p>
+          <p className="mt-1.5 text-sm text-gray-600">
+            Printed on: {report.generatedAt}
+            {report.printedBy && <> | Printed by: {report.printedBy}</>}
+          </p>
         </div>
+        {/* keeps the text block centred on the page */}
+        <span className="h-24 w-24 sm:h-28 sm:w-28" aria-hidden="true" />
       </header>
+      {report.filters.length > 0 && (
+        <p className="mb-4 text-center text-sm font-medium text-gray-700">{report.filters.join(" | ")}</p>
+      )}
 
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
         {report.summary.map((s) => (
@@ -102,7 +112,7 @@ export function ReportView({ report }: { report: Report }) {
           {n}
         </p>
       ))}
-      <p className="mt-4 text-xs text-gray-400">Generated {report.generatedAt}</p>
+      <p className="mt-4 text-xs text-gray-400">AgriTrack · Kurunduwatta Villa &amp; Cottages Polytunnel</p>
     </article>
   );
 }

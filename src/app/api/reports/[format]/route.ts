@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { printedByLabel } from "@/lib/session";
 import { buildReport } from "@/lib/reports";
 import { renderReportPdf } from "@/lib/report-pdf";
 import { renderReportExcel } from "@/lib/report-excel";
@@ -24,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ form
     cropId: sp.get("cropId") ?? undefined,
     customer: sp.get("customer") ?? undefined,
     category: sp.get("category") ?? undefined,
-  });
+  }, printedByLabel(session.user));
 
   const fileBase = `agritrack-${report.type}-${new Date().toISOString().slice(0, 10)}`;
 

@@ -20,14 +20,23 @@ export async function renderReportExcel(report: Report): Promise<Buffer> {
   const ws = wb.addWorksheet(report.title.slice(0, 31));
   const maxCols = Math.max(...report.sections.map((s) => s.columns.length), 2);
 
-  const titleRow = ws.addRow([report.title]);
-  titleRow.font = { bold: true, size: 14, color: { argb: GREEN } };
-  ws.mergeCells(titleRow.number, 1, titleRow.number, maxCols);
-  ws.addRow([report.subtitle]).font = { italic: true, color: { argb: "FF4B5563" } };
-  ws.addRow([`Generated ${report.generatedAt} - Athukorala Group - AgriTrack, Kurunduwatta Villa & Cottages`]).font = {
-    size: 9,
-    color: { argb: "FF6B7280" },
+  // Letterhead rows, centred across the table width.
+  const centred = (text: string, font: Partial<ExcelJS.Font>) => {
+    const row = ws.addRow([text]);
+    ws.mergeCells(row.number, 1, row.number, maxCols);
+    row.font = font;
+    row.alignment = { horizontal: "center" };
+    return row;
   };
+  centred("ATHUKORALA GROUP (PVT) LTD", { bold: true, size: 18, color: { argb: GREEN } }).height = 26;
+  centred(`${report.title} · ${report.period}`, { bold: true, size: 13 });
+  centred(
+    `Printed on: ${report.generatedAt}${report.printedBy ? ` | Printed by: ${report.printedBy}` : ""}`,
+    { size: 10, color: { argb: "FF4B5563" } },
+  );
+  if (report.filters.length) centred(report.filters.join(" | "), { size: 10, italic: true });
+  const rule = ws.addRow([]);
+  for (let c = 1; c <= maxCols; c++) rule.getCell(c).border = { bottom: { style: "thick", color: { argb: "FF082410" } } };
   ws.addRow([]);
 
   for (const s of report.summary) {

@@ -24,8 +24,16 @@ export type ReportSection = {
 export type Report = {
   type: string;
   title: string;
+  /** Period + filters on one line (used by Excel and as a fallback). */
   subtitle: string;
+  /** Short period label for the letterhead, e.g. "November 2026". */
+  period: string;
+  /** Active filters, e.g. ["Sold to: Kurunduwatta Villa"]. */
+  filters: string[];
+  /** Print time in Sri Lanka time, e.g. "23 Nov 2026 · 2:36 PM". */
   generatedAt: string;
+  /** Who generated the report, e.g. "Administrator (Admin)". */
+  printedBy?: string;
   summary: { label: string; value: string }[];
   sections: ReportSection[];
   notes?: string[];

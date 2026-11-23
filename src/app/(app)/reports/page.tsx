@@ -21,6 +21,7 @@ import {
   type ReportParams,
 } from "@/lib/reports";
 import { EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { printedByLabel, requireUser } from "@/lib/session";
 import { customerTypeLabel } from "@/lib/sales";
 
 export const metadata = { title: "Reports" };
@@ -33,7 +34,7 @@ export default async function ReportsPage({
   const params = await searchParams;
   const { type, range, cropId, customer, category } = resolveReportParams(params);
   const [report, crops] = await Promise.all([
-    buildReport(params),
+    buildReport(params, printedByLabel(await requireUser())),
     prisma.crop.findMany({ orderBy: [{ status: "asc" }, { name: "asc" }] }),
   ]);
   const filters = { cropId, customer, category };
