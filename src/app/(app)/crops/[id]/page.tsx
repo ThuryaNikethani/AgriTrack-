@@ -11,14 +11,17 @@ import { buttonVariants } from "@/components/ui/button";
 import { DeleteButton } from "@/components/form-helpers";
 import { EmptyRow, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { cropStatusVariant } from "@/lib/crops";
-import { enumLabel, formatDate, formatKg } from "@/lib/utils";
+import { enumLabel, formatDate, formatKg, formatNumber } from "@/lib/utils";
 import { deleteCrop } from "../actions";
 
 export default async function CropDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const crop = await prisma.crop.findUnique({
     where: { id },
-    include: { harvests: { orderBy: { scheduledDate: "asc" } } },
+    include: {
+      harvests: { orderBy: { scheduledDate: "asc" } },
+      fertilizerUsages: { orderBy: { date: "desc" }, include: { fertilizer: true } },
+    },
   });
   if (!crop) notFound();
 
@@ -113,6 +116,39 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
                       {isCompleted(h) ? "Edit" : "Record"}
                     </Link>
                   </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Fertilizer applied</CardTitle>
+          </CardHeader>
+          <Table>
+            <THead>
+              <tr>
+                <TH>Date</TH>
+                <TH>Fertilizer</TH>
+                <TH className="text-right">Quantity</TH>
+                <TH>Notes</TH>
+              </tr>
+            </THead>
+            <TBody>
+              {crop.fertilizerUsages.length === 0 && <EmptyRow colSpan={4} />}
+              {crop.fertilizerUsages.map((u) => (
+                <TR key={u.id}>
+                  <TD>{formatDate(u.date)}</TD>
+                  <TD>
+                    <Link href={`/fertilizers/${u.fertilizer.id}`} className="text-green-700 hover:underline">
+                      {u.fertilizer.name}
+                    </Link>
+                  </TD>
+                  <TD className="text-right">
+                    {formatNumber(u.quantity)} {u.fertilizer.unit}
+                  </TD>
+                  <TD>{u.notes ?? "-"}</TD>
                 </TR>
               ))}
             </TBody>
