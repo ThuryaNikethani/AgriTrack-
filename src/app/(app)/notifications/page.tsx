@@ -1,21 +1,44 @@
 import Link from "next/link";
-import { AlertTriangle, BellOff, CalendarClock, Check, PackageX, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowRight, BellOff, CalendarClock, Check, PackageX, RefreshCw } from "lucide-react";
 import type { NotificationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { syncNotifications } from "@/lib/notifications";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn, formatDate } from "@/lib/utils";
 import { markAllRead, markRead, refreshNotifications } from "./actions";
 
 export const metadata = { title: "Notifications" };
 
-const typeStyle: Record<NotificationType, { icon: typeof AlertTriangle; className: string; label: string }> = {
-  LOW_STOCK: { icon: AlertTriangle, className: "bg-amber-50 text-amber-700", label: "Low stock" },
-  OUT_OF_STOCK: { icon: PackageX, className: "bg-red-50 text-red-700", label: "Out of stock" },
-  HARVEST_DUE: { icon: CalendarClock, className: "bg-sky-50 text-sky-700", label: "Harvest reminder" },
-  HARVEST_OVERDUE: { icon: AlertTriangle, className: "bg-red-50 text-red-700", label: "Harvest overdue" },
+const typeStyle: Record<
+  NotificationType,
+  { icon: typeof AlertTriangle; className: string; border: string; label: string }
+> = {
+  LOW_STOCK: {
+    icon: AlertTriangle,
+    className: "bg-gradient-to-br from-gold-200 to-gold-400 text-green-950",
+    border: "border-gray-200/70 border-l-gold-400",
+    label: "Low stock",
+  },
+  OUT_OF_STOCK: {
+    icon: PackageX,
+    className: "bg-gradient-to-br from-red-400 to-red-600 text-white",
+    border: "border-gray-200/70 border-l-red-500",
+    label: "Out of stock",
+  },
+  HARVEST_DUE: {
+    icon: CalendarClock,
+    className: "bg-gradient-to-br from-green-400 to-green-600 text-white",
+    border: "border-gray-200/70 border-l-green-500",
+    label: "Harvest reminder",
+  },
+  HARVEST_OVERDUE: {
+    icon: AlertTriangle,
+    className: "bg-gradient-to-br from-red-400 to-red-600 text-white",
+    border: "border-gray-200/70 border-l-red-500",
+    label: "Harvest overdue",
+  },
 };
 
 export default async function NotificationsPage() {
@@ -45,47 +68,63 @@ export default async function NotificationsPage() {
         }
       />
 
-      <Card className="divide-y divide-gray-100">
+      <div className="space-y-3">
         {notifications.length === 0 && (
-          <div className="flex flex-col items-center gap-2 p-10 text-gray-500">
-            <BellOff className="h-8 w-8" />
-            <p>All clear - no alerts right now.</p>
-          </div>
+          <Card className="flex flex-col items-center gap-3 p-12 text-gray-500">
+            <span className="rounded-full bg-green-50 p-4 text-green-600">
+              <BellOff className="h-8 w-8" />
+            </span>
+            <p className="font-semibold">All clear - no alerts right now.</p>
+          </Card>
         )}
         {notifications.map((n) => {
           const style = typeStyle[n.type];
           const Icon = style.icon;
           return (
-            <div key={n.id} className={cn("flex items-start gap-4 p-4", !n.read && "bg-green-50/40")}>
-              <span className={cn("rounded-md p-2", style.className)}>
+            <div
+              key={n.id}
+              className={cn(
+                "flex animate-fade-up items-start gap-4 rounded-2xl border border-l-4 bg-white/95 p-5 shadow-soft transition hover:shadow-lift",
+                style.border,
+                !n.read && "ring-1 ring-gold-200",
+              )}
+            >
+              <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", style.className)}>
                 <Icon className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className={cn("text-sm", n.read ? "text-gray-700" : "font-semibold text-gray-900")}>{n.title}</p>
-                  <span className="text-xs text-gray-400">
-                    {style.label} - {formatDate(n.createdAt)}
-                  </span>
+                  <p className={cn("text-base", n.read ? "font-medium text-gray-700" : "font-bold text-gray-900")}>
+                    {n.title}
+                  </p>
+                  {!n.read && (
+                    <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-bold text-gold-700">New</span>
+                  )}
                 </div>
-                <p className="mt-0.5 text-sm text-gray-600">{n.message}</p>
-                {n.link && (
-                  <Link href={n.link} className="mt-1 inline-block text-sm text-green-700 hover:underline">
-                    Take action
-                  </Link>
-                )}
+                <p className="mt-1 text-sm text-gray-600">{n.message}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                  <span className="font-semibold uppercase tracking-wider">{style.label}</span>
+                  <span>·</span>
+                  <span>{formatDate(n.createdAt)}</span>
+                  {n.link && (
+                    <Link href={n.link} className={buttonVariants({ variant: "secondary", size: "sm" })}>
+                      Take action <ArrowRight />
+                    </Link>
+                  )}
+                </div>
               </div>
               {!n.read && (
                 <form action={markRead}>
                   <input type="hidden" name="id" value={n.id} />
-                  <Button variant="ghost" size="sm" type="submit">
-                    Mark read
+                  <Button variant="outline" size="sm" type="submit">
+                    <Check /> Mark read
                   </Button>
                 </form>
               )}
             </div>
           );
         })}
-      </Card>
+      </div>
     </>
   );
 }

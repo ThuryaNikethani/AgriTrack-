@@ -1,4 +1,4 @@
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, SlidersHorizontal } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { PrintButton } from "@/components/print-button";
@@ -33,7 +33,7 @@ export default async function ReportsPage({
           actions={
             <>
               <PrintButton />
-              <a href={`/api/reports/pdf?${query}`} className={buttonVariants({ variant: "outline" })}>
+              <a href={`/api/reports/pdf?${query}`} className={buttonVariants({ variant: "gold" })}>
                 <FileText /> PDF
               </a>
               <a href={`/api/reports/excel?${query}`} className={buttonVariants({ variant: "outline" })}>
@@ -43,7 +43,19 @@ export default async function ReportsPage({
           }
         />
 
-        <form method="get" className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
+        <form
+          method="get"
+          className="mb-6 flex animate-fade-up flex-wrap items-end gap-4 rounded-2xl border border-gray-200/70 bg-white/95 p-5 shadow-soft"
+        >
+          <div className="flex items-center gap-3 self-center pr-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold-200 to-gold-400 text-green-950">
+              <SlidersHorizontal className="h-5 w-5" />
+            </span>
+            <div className="leading-tight">
+              <p className="text-sm font-bold text-gray-900">Report options</p>
+              <p className="text-xs text-gray-500">Type, period and crop</p>
+            </div>
+          </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="type">Report</Label>
             <Select id="type" name="type" defaultValue={type} className="w-64">
