@@ -1,28 +1,60 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import Link from "next/link";
 import type { Crop } from "@prisma/client";
 import { createCrop, updateCrop } from "./actions";
 import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
 import { FormMessage, SubmitButton, initialActionState } from "@/components/form-helpers";
 import { buttonVariants } from "@/components/ui/button";
-import { toDateInput } from "@/lib/utils";
+import { addDays, toDateInput } from "@/lib/utils";
+import { VEGETABLES, findVegetable, vegetableLabel } from "@/lib/vegetables";
 
 const statuses = ["GROWING", "HARVESTING", "COMPLETED", "FAILED"] as const;
 
 export function CropForm({ crop }: { crop?: Crop }) {
   const [state, formAction] = useActionState(crop ? updateCrop : createCrop, initialActionState);
+  const formRef = useRef<HTMLFormElement>(null);
   const e = state.errors ?? {};
 
+  /** Fills scientific name and expected harvest date from the vegetable catalogue (only empty fields). */
+  function autofill() {
+    const form = formRef.current;
+    if (!form) return;
+    const field = (n: string) => form.elements.namedItem(n) as HTMLInputElement | null;
+    const veg = findVegetable(field("name")?.value);
+    if (!veg) return;
+    const sci = field("scientificName");
+    if (sci && !sci.value) sci.value = veg.scientificName;
+    const planted = field("plantedDate")?.value;
+    const expected = field("expectedHarvestDate");
+    if (planted && expected && !expected.value) {
+      expected.value = toDateInput(addDays(new Date(planted), veg.daysToHarvest));
+    }
+  }
+
   return (
-    <form action={formAction} className="grid gap-4 sm:grid-cols-2">
+    <form ref={formRef} action={formAction} className="grid gap-4 sm:grid-cols-2">
       {crop && <input type="hidden" name="id" value={crop.id} />}
       <div className="sm:col-span-2">
         <FormMessage state={state} />
       </div>
       <Field label="Vegetable" htmlFor="name" error={e.name}>
-        <Input id="name" name="name" defaultValue={crop?.name} placeholder="e.g. Tomato" required />
+        <Input
+          id="name"
+          name="name"
+          list="vegetable-list"
+          defaultValue={crop?.name}
+          placeholder="Choose or type, e.g. Tomato"
+          onChange={autofill}
+          onBlur={autofill}
+          required
+        />
+        <datalist id="vegetable-list">
+          {VEGETABLES.map((v) => (
+            <option key={v.name} value={v.name} label={vegetableLabel(v)} />
+          ))}
+        </datalist>
       </Field>
       <Field label="Scientific name" htmlFor="scientificName" error={e.scientificName}>
         <Input
@@ -49,7 +81,14 @@ export function CropForm({ crop }: { crop?: Crop }) {
         </Select>
       </Field>
       <Field label="Planted date" htmlFor="plantedDate" error={e.plantedDate}>
-        <Input id="plantedDate" name="plantedDate" type="date" defaultValue={toDateInput(crop?.plantedDate)} required />
+        <Input
+          id="plantedDate"
+          name="plantedDate"
+          type="date"
+          defaultValue={toDateInput(crop?.plantedDate)}
+          onChange={autofill}
+          required
+        />
       </Field>
       <Field label="Expected harvest date" htmlFor="expectedHarvestDate" error={e.expectedHarvestDate}>
         <Input
