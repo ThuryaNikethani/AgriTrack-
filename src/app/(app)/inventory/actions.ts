@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { refreshAlerts } from "@/lib/notifications";
 import { parseForm, zDate, zNonNegative, zOptionalText, zPositive } from "@/lib/forms";
 import type { ActionState } from "@/components/form-helpers";
 
@@ -71,6 +72,7 @@ export async function recordMovement(_prev: ActionState, formData: FormData): Pr
     }),
   ]);
 
+  await refreshAlerts(); // push a low-stock alert right away if needed
   revalidateInventory();
   return { ok: true, message: "Stock updated." };
 }

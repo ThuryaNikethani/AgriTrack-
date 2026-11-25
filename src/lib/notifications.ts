@@ -1,5 +1,6 @@
 import type { NotificationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { isPushConfigured, sendPush } from "@/lib/push";
 import { getTiming } from "@/lib/harvest";
 import { getStockStatus } from "@/lib/stock";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -101,7 +102,53 @@ export async function syncNotifications() {
   if (fresh.length > 0) {
     await prisma.notification.createMany({ data: fresh, skipDuplicates: true });
   }
-  return { active: candidates.length, created: fresh.length };
+  const pushed = await pushNewNotifications();
+  return { active: candidates.length, created: fresh.length, pushed };
+}
+
+/** Max alerts sent as separate phone notifications; any more are grouped into one summary. */
+const MAX_INDIVIDUAL_PUSHES = 3;
+
+/**
+ * Sends alerts that have not been pushed yet to every registered phone.
+ * Each alert is claimed (pushed = true) before sending, so two syncs running
+ * at the same time never send the same alert twice.
+ */
+async function pushNewNotifications(): Promise<number> {
+  const pending = await prisma.notification.findMany({
+    where: { pushed: false },
+    orderBy: { createdAt: "asc" },
+  });
+  const claimed: typeof pending = [];
+  for (const n of pending) {
+    const { count } = await prisma.notification.updateMany({ where: { id: n.id, pushed: false }, data: { pushed: true } });
+    if (count === 1) claimed.push(n);
+  }
+  if (claimed.length === 0 || !isPushConfigured()) return 0;
+
+  if (claimed.length <= MAX_INDIVIDUAL_PUSHES) {
+    for (const n of claimed) {
+      await sendPush({ title: n.title, body: n.message, url: n.link ?? "/notifications", tag: n.dedupeKey });
+    }
+  } else {
+    const titles = claimed.slice(0, 3).map((n) => n.title);
+    await sendPush({
+      title: `AgriTrack: ${claimed.length} new alerts`,
+      body: `${titles.join(" · ")}${claimed.length > 3 ? ` and ${claimed.length - 3} more` : ""}`,
+      url: "/notifications",
+      tag: "agritrack-summary",
+    });
+  }
+  return claimed.length;
+}
+
+/** Re-checks alerts right after stock changes, so low-stock pushes go out immediately. */
+export async function refreshAlerts() {
+  try {
+    await syncNotifications();
+  } catch (error) {
+    console.error("Notification sync failed", error);
+  }
 }
 
 let lastSync = 0;

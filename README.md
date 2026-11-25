@@ -151,6 +151,31 @@ src/lib/             business logic (harvest rules, finance, reports, notificati
 | `npm run db:seed` | Load demo data |
 | `npm run db:studio` | Open Prisma Studio |
 
+## Phone notifications (Web Push)
+
+AgriTrack can be installed on a phone as an app, and it sends alerts to the phone even when the phone is locked.
+
+1. Generate keys once with `npx web-push generate-vapid-keys`. Put them in `.env` (and in Vercel) as
+   `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT`.
+2. The site must be served over **https**, for example on Vercel. `localhost` also works for testing on the same computer.
+3. On each phone:
+   - **Android (Chrome):** open the site, tap **⋮ → Install app** (or **Add to Home screen**).
+   - **iPhone (iOS 16.4+):** open the site in Safari, tap **Share → Add to Home Screen**, then open AgriTrack from the Home Screen.
+4. Sign in, go to **Notifications** (or **My account**), tap **Turn on**, allow notifications, and then tap **Send test**.
+
+New alerts are pushed:
+
+- **Right away** when fertilizer or inventory stock drops to its reorder level.
+- **Every time the scheduled job runs**, for harvests that are due soon or overdue.
+
+On the Vercel free plan, cron jobs run once a day (6:00 AM Sri Lanka time, set in `vercel.json`).
+For hourly checks, use a free scheduler such as cron-job.org. It should call:
+
+```
+GET https://<your-site>/api/cron/notifications
+Authorization: Bearer <CRON_SECRET>
+```
+
 ## Image credits
 
 - Crop photos in `public/crops/` come from the Kurunduwatta Plant Identification cards, except:

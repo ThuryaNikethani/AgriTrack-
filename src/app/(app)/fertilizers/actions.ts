@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { refreshAlerts } from "@/lib/notifications";
 import { parseForm, zDate, zNonNegative, zOptionalText, zPositive } from "@/lib/forms";
 import type { ActionState } from "@/components/form-helpers";
 
@@ -89,6 +90,7 @@ export async function recordUsage(_prev: ActionState, formData: FormData): Promi
     }),
   ]);
 
+  await refreshAlerts(); // push a low-stock alert right away if needed
   revalidateFertilizerPages(data.fertilizerId);
   return { ok: true, message: "Usage recorded and stock updated." };
 }
