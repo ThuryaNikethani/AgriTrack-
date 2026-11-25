@@ -32,6 +32,7 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
   const harvested = crop.harvests.reduce((sum, h) => sum + (h.actualQuantityKg ?? 0), 0);
 
   const details: [string, React.ReactNode][] = [
+    ["Scientific name", crop.scientificName ? <em>{crop.scientificName}</em> : "-"],
     ["Variety", crop.variety ?? "-"],
     ["Bed / section", crop.bedLocation ?? "-"],
     ["Planted", formatDate(crop.plantedDate)],
@@ -55,7 +56,7 @@ export default async function CropDetailPage({ params }: { params: Promise<{ id:
     <>
       <PageHeader
         title={crop.name}
-        eyebrow={[crop.variety, crop.bedLocation].filter(Boolean).join(" · ") || "Crop cycle"}
+        eyebrow={[crop.scientificName, crop.variety, crop.bedLocation].filter(Boolean).join(" · ") || "Crop cycle"}
         description={crop.notes ?? `Planted ${formatDate(crop.plantedDate)} · ${crop.plantedQuantity} plants`}
         actions={
           <>

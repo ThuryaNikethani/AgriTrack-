@@ -11,6 +11,7 @@ import type { ActionState } from "@/components/form-helpers";
 const cropSchema = z
   .object({
     name: z.string({ required_error: "Vegetable name is required" }).min(1).max(100),
+    scientificName: z.string().max(150).optional(),
     variety: z.string().max(100).optional(),
     bedLocation: z.string().max(100).optional(),
     plantedDate: zDate,

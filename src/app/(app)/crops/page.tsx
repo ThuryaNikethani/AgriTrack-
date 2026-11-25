@@ -78,6 +78,9 @@ export default async function CropsPage({
                 <CropAvatar name={crop.name} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-lg font-bold text-gray-900 group-hover:text-green-700">{crop.name}</p>
+                  {crop.scientificName && (
+                    <p className="truncate text-sm italic text-green-700">{crop.scientificName}</p>
+                  )}
                   <p className="truncate text-sm text-gray-500">
                     {[crop.variety, crop.bedLocation].filter(Boolean).join(" · ") || "Polytunnel"}
                   </p>

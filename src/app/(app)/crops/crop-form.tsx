@@ -24,6 +24,15 @@ export function CropForm({ crop }: { crop?: Crop }) {
       <Field label="Vegetable" htmlFor="name" error={e.name}>
         <Input id="name" name="name" defaultValue={crop?.name} placeholder="e.g. Tomato" required />
       </Field>
+      <Field label="Scientific name" htmlFor="scientificName" error={e.scientificName}>
+        <Input
+          id="scientificName"
+          name="scientificName"
+          defaultValue={crop?.scientificName ?? ""}
+          placeholder="e.g. Solanum lycopersicum"
+          className="italic"
+        />
+      </Field>
       <Field label="Variety" htmlFor="variety" error={e.variety}>
         <Input id="variety" name="variety" defaultValue={crop?.variety ?? ""} />
       </Field>

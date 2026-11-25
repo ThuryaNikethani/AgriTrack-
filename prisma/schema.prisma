@@ -44,6 +44,7 @@ enum CropStatus {
 model Crop {
   id                  String     @id @default(cuid())
   name                String // vegetable type e.g. Tomato
+  scientificName      String? // e.g. Solanum lycopersicum
   variety             String?
   bedLocation         String? // bed / section inside the polytunnel
   plantedDate         DateTime

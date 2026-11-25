@@ -579,6 +579,7 @@ export async function buildReport(params: ReportParams, printedBy?: string): Pro
         const harvested = c.harvests.reduce((s, h) => s + (h.actualQuantityKg ?? 0), 0);
         return {
           crop: c.name,
+          scientificName: c.scientificName,
           variety: c.variety,
           bed: c.bedLocation,
           planted: c.plantedDate.toISOString(),
@@ -606,6 +607,7 @@ export async function buildReport(params: ReportParams, printedBy?: string): Pro
           {
             columns: [
               { key: "crop", header: "Vegetable" },
+              { key: "scientificName", header: "Scientific name" },
               { key: "variety", header: "Variety" },
               { key: "bed", header: "Bed" },
               { key: "planted", header: "Planted", format: "date" },
