@@ -150,3 +150,10 @@ src/lib/             business logic (harvest rules, finance, reports, notificati
 | `npm run db:migrate` | Create or apply migrations in development |
 | `npm run db:seed` | Load demo data |
 | `npm run db:studio` | Open Prisma Studio |
+
+## Image credits
+
+- Crop photos in `public/crops/` come from the Kurunduwatta Plant Identification cards, except:
+- `public/crops/spring-onion.jpg`: "A Spring onions on the poly boxes" by Peachyeung316,
+  [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
+  [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:A_Spring_onions_on_the_poly_boxes.jpg). Resized.

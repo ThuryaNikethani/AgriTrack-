@@ -29,7 +29,14 @@ export const VEGETABLES: Vegetable[] = [
   { name: "Green beans", localName: "Bonchi", scientificName: "Phaseolus vulgaris L.", image: "/crops/green-beans.jpg", daysToHarvest: 55 },
   { name: "Radish", localName: "Raabu", scientificName: "Raphanus sativus", image: "/crops/radish.jpg", daysToHarvest: 40 },
   { name: "Carrot", scientificName: "Daucus carota subsp. sativus", image: "/crops/carrot.jpg", daysToHarvest: 80 },
-  { name: "Spring onion", localName: "Luunu kola", scientificName: "Allium fistulosum", daysToHarvest: 70 },
+  {
+    name: "Spring onion",
+    localName: "Luunu kola",
+    scientificName: "Allium fistulosum",
+    // Photo: "A Spring onions on the poly boxes" by Peachyeung316, CC BY-SA 4.0, Wikimedia Commons
+    image: "/crops/spring-onion.jpg",
+    daysToHarvest: 70,
+  },
   { name: "Salad cucumber", localName: "Pipinja", scientificName: "Cucumis sativus", image: "/crops/salad-cucumber.jpg", daysToHarvest: 45 },
 ];
 
