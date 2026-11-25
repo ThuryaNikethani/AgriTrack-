@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       topbar={
         <>
           <NotificationBell unread={unread} />
-          <UserMenu name={user.name ?? user.email ?? "User"} role={user.role} />
+          <UserMenu name={user.name ?? user.email ?? "User"} email={user.email} role={user.role} />
         </>
       }
     >
