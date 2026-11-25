@@ -25,13 +25,13 @@ export function Sidebar({
     <>
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-green-950/40 backdrop-blur-sm lg:hidden print:hidden"
+          className="fixed inset-0 z-40 bg-green-950/40 backdrop-blur-sm lg:hidden print:hidden"
           onClick={onClose}
         />
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col overflow-hidden bg-green-950 text-green-50 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 print:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-green-950 text-green-50 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 print:hidden",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >

@@ -31,8 +31,8 @@ export function PageHeader({
   const Icon = icon ?? item?.icon;
 
   return (
-    // z-20 + decoration clipped in its own layer, so dropdowns in `actions` can overflow the banner.
-    <section className="relative z-20 mb-8 animate-fade-up rounded-3xl bg-green-950 px-6 py-6 text-white shadow-lift sm:px-8 sm:py-7 print:mb-4 print:bg-white print:p-0 print:text-black print:shadow-none">
+    // z-10 (below the sticky top bar) + decoration clipped in its own layer, so menus can overflow the banner.
+    <section className="relative z-10 mb-8 animate-fade-up rounded-3xl bg-green-950 px-6 py-6 text-white shadow-lift sm:px-8 sm:py-7 print:mb-4 print:bg-white print:p-0 print:text-black print:shadow-none">
       <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl print:hidden" aria-hidden="true">
         <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-green-900 to-green-950" />
         <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gold-400/25 blur-3xl" />

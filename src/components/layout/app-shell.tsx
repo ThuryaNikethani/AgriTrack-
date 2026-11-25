@@ -25,7 +25,7 @@ export function AppShell({
     <div className="flex min-h-screen">
       <Sidebar isAdmin={isAdmin} open={open} onClose={() => setOpen(false)} unread={unread} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-gray-200/60 bg-white/70 px-4 backdrop-blur-xl sm:px-8 print:hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200/60 bg-white/70 px-4 backdrop-blur-xl sm:px-8 print:hidden">
           <button
             className="rounded-xl p-2 text-gray-700 hover:bg-gray-100 lg:hidden"
             onClick={() => setOpen(true)}
