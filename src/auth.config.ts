@@ -17,6 +17,11 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isLoginPage = nextUrl.pathname.startsWith("/login");
 
+      // Password recovery pages are open to everyone.
+      if (nextUrl.pathname.startsWith("/forgot-password") || nextUrl.pathname.startsWith("/reset-password")) {
+        return true;
+      }
+
       if (isLoginPage) {
         if (isLoggedIn) return Response.redirect(new URL("/dashboard", nextUrl));
         return true;

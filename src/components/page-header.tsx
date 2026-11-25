@@ -2,7 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { findNavItem } from "@/components/layout/nav-items";
+
+const ACCOUNT_ITEM = { icon: UserRound, group: "Account" };
 
 /**
  * Page banner: dark green with gold accents, an icon for the section and
@@ -22,7 +25,9 @@ export function PageHeader({
   eyebrow?: string;
 }) {
   const pathname = usePathname();
-  const item = findNavItem(pathname);
+  // Pages outside the sidebar (e.g. My account) get their icon here, because a server
+  // page cannot pass an icon component to this client component.
+  const item = findNavItem(pathname) ?? (pathname.startsWith("/account") ? ACCOUNT_ITEM : undefined);
   const Icon = icon ?? item?.icon;
 
   return (

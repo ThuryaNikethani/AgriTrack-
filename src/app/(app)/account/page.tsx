@@ -20,8 +20,6 @@ export default async function AccountPage() {
     <>
       <PageHeader
         title="My account"
-        eyebrow="Account"
-        icon={UserRound}
         description="Your profile and password."
       />
 

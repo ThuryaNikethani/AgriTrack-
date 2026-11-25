@@ -12,6 +12,18 @@ function getTransport() {
   });
 }
 
+export function isEmailConfigured() {
+  return Boolean(process.env.SMTP_HOST);
+}
+
+/** Sends one e-mail. Returns false when SMTP is not configured. */
+export async function sendMail(message: { to: string; subject: string; text: string; html?: string }) {
+  const transport = getTransport();
+  if (!transport) return false;
+  await transport.sendMail({ from: process.env.SMTP_FROM ?? "AgriTrack <no-reply@example.com>", ...message });
+  return true;
+}
+
 /**
  * E-mails all notifications that have not been e-mailed yet as one digest.
  * Does nothing when SMTP or NOTIFY_EMAIL_TO is not configured.
