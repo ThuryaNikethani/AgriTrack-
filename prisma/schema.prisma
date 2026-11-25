@@ -29,7 +29,23 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  resetTokens PasswordResetToken[]
+  resetTokens       PasswordResetToken[]
+  pushSubscriptions PushSubscription[]
+}
+
+/// A browser / phone that has allowed push notifications for a user.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// One-time password reset link. Only a SHA-256 hash of the token is stored.
@@ -272,5 +288,6 @@ model Notification {
   dedupeKey String           @unique // one active notification per condition
   read      Boolean          @default(false)
   emailed   Boolean          @default(false)
+  pushed    Boolean          @default(false)
   createdAt DateTime         @default(now())
 }

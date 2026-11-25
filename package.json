@@ -29,6 +29,7 @@
     "react-dom": "19.1.0",
     "recharts": "2.15",
     "tailwind-merge": "^3.7.1",
+    "web-push": "3.6",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "@types/nodemailer": "^6.4.24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "prisma": "^6.19.3",

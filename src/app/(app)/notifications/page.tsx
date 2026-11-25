@@ -4,6 +4,7 @@ import type { NotificationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { syncNotifications } from "@/lib/notifications";
 import { PageHeader } from "@/components/page-header";
+import { PushToggle } from "@/components/push-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn, formatDate } from "@/lib/utils";
@@ -67,6 +68,10 @@ export default async function NotificationsPage() {
           </>
         }
       />
+
+      <div className="mb-6">
+        <PushToggle />
+      </div>
 
       <div className="space-y-3">
         {notifications.length === 0 && (

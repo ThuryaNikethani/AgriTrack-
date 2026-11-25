@@ -2,6 +2,7 @@ import { KeyRound, ShieldCheck, UserRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { PageHeader } from "@/components/page-header";
+import { PushToggle } from "@/components/push-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { enumLabel, formatDate } from "@/lib/utils";
@@ -20,8 +21,12 @@ export default async function AccountPage() {
     <>
       <PageHeader
         title="My account"
-        description="Your profile and password."
+        description="Your profile, password and phone notifications."
       />
+
+      <div className="mb-6">
+        <PushToggle />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <Card className="h-fit">
