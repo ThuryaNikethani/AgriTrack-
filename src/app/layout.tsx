@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -25,6 +25,20 @@ export const metadata: Metadata = {
   },
   description:
     "Smart Polytunnel & Agricultural Management System for Kurunduwatta Villa & Cottages",
+  applicationName: "AgriTrack",
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "AgriTrack",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#164222",
 };
 
 export default function RootLayout({
